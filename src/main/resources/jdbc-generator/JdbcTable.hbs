@@ -1,0 +1,96 @@
+{{#tablesPackage}}
+package {{.}};
+{{/tablesPackage}}
+
+{{#tableImports}}
+import {{.}};
+{{/tableImports}}
+
+public class {{tableClassName}} {
+
+    /* ========== {{tagAttributes}} ========== */
+    private DataSource dataSource;
+
+    /* ========== {{tagInstance}} ========== */
+    public {{tableClassName}}(DataSource dataSource) {
+        this.dataSource = dataSource;
+    }
+
+    /* ========== {{tagRow}} ========== */
+    public static class {{rowClassName}} extends Base {
+        {{#columns}}
+        public {{javaClass}} {{javaName}};
+        {{/columns}}
+    }
+
+    /* ========== SELECT ========== */
+    public List<{{rowClassName}}> select() {
+        SqlRequest sql = new SqlRequest(dataSource);
+        sql.append("SELECT * FROM {{tableName}}");
+        SqlResponse response = sql.execute();
+        return response.toList({{rowClassName}}.class);
+    }
+    {{#if columnsKeys}}
+
+    public {{rowClassName}} select({{#columnsKeys}}{{javaClass}} {{javaName}}{{#unless @last}}, {{/unless}}{{/columnsKeys}}) {
+        SqlRequest sql = new SqlRequest(dataSource);
+        sql.append("SELECT * FROM {{tableName}}");
+        {{#columnsKeys}}
+        sql.append("{{#if @first}}WHERE{{else}}AND{{/if}} {{columnName}} = ?", {{javaName}});
+        {{/columnsKeys}}
+        SqlResponse response = sql.execute();
+        return response.toClass({{rowClassName}}.class);
+    }
+    {{/if}}
+    {{#unless isView}}
+
+    /* ========== INSERT ========== */
+    public SqlResponse insert({{rowClassName}} {{rowObjectName}}) {
+        SqlRequest sql = new SqlRequest(dataSource);
+        sql.append("INSERT INTO {{tableName}} ({{#columnsNoAutoIncrement}}{{columnName}}{{#unless @last}}, {{/unless}}{{/columnsNoAutoIncrement}}) VALUES (");
+        {{#columnsNoAutoIncrement}}
+        sql.append("?{{#if @last}}){{else}},{{/if}}", {{../rowObjectName}}.{{javaName}});
+        {{/columnsNoAutoIncrement}}
+        SqlResponse response = sql.execute();
+        {{#columnsAutoIncrement}}
+        {{../rowObjectName}}.{{javaName}} = ({{javaClass}}) response.generatedKey("{{columnName}}");
+        {{/columnsAutoIncrement}}
+        return response;
+    }
+    {{/unless}}
+    {{#unless isView}}
+    {{#if columnsKeys}}
+    {{#if columnsNoKeys}}
+
+    /* ========== UPDATE ========== */
+    public SqlResponse update({{rowClassName}} {{rowObjectName}}) {
+        SqlRequest sql = new SqlRequest(dataSource);
+        sql.append("UPDATE {{tableName}}");
+        {{#columnsNoKeys}}
+        sql.append("SET {{columnName}} = ?", {{../rowObjectName}}.{{javaName}});
+        {{/columnsNoKeys}}
+        {{#columnsKeys}}
+        sql.append("{{#if @first}}WHERE{{else}}AND{{/if}} {{columnName}} = ?", {{../rowObjectName}}.{{javaName}});
+        {{/columnsKeys}}
+        SqlResponse response = sql.execute();
+        return response;
+    }
+    {{/if}}
+    {{/if}}
+    {{/unless}}
+    {{#unless isView}}
+    {{#if columnsKeys}}
+    
+    /* ========== DELETE ========== */
+    public SqlResponse delete({{#columnsKeys}}{{javaClass}} {{javaName}}{{#unless @last}}, {{/unless}}{{/columnsKeys}}) {
+        SqlRequest sql = new SqlRequest(dataSource);
+        sql.append("DELETE FROM {{tableName}}");
+        {{#columnsKeys}}
+        sql.append("{{#if @first}}WHERE{{else}}AND{{/if}} {{columnName}} = ?", {{javaName}});
+        {{/columnsKeys}}
+        SqlResponse response = sql.execute();
+        return response;
+    }
+    {{/if}}
+    {{/unless}}
+}

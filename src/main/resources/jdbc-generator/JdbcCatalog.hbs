@@ -1,0 +1,22 @@
+{{#catalogPackage}}
+package {{.}};
+{{/catalogPackage}}
+
+{{#catalogImports}}
+import {{.}};
+{{/catalogImports}}
+
+public class {{catalogClassName}} {
+
+    /* ========== {{tagTables}} ========== */
+    {{#tables}}
+    public {{tableClassName}} {{tableObjectName}};
+    {{/tables}}
+
+    /* ========== {{tagInstance}} ========== */
+    public {{catalogClassName}}(DataSource dataSource) {
+        {{#tables}}
+        this.{{tableObjectName}} = new {{tableClassName}}(dataSource);
+        {{/tables}}
+    }
+}
