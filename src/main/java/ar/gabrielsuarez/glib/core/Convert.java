@@ -2,15 +2,19 @@ package ar.gabrielsuarez.glib.core;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+
+import ar.gabrielsuarez.glib.G;
 
 public abstract class Convert {
 
@@ -103,6 +107,18 @@ public abstract class Convert {
 			if (x instanceof TemporalAccessor) {
 				return Date.from(Instant.from((TemporalAccessor) x).atZone(ZoneId.systemDefault()).toInstant());
 			}
+			if (x instanceof String) {
+				String value = (String) x;
+				String dateFormat = G.dateFormat(value);
+				if (dateFormat != null) {
+					SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+					try {
+						return sdf.parse(value);
+					} catch (Exception e) {
+						return null;
+					}
+				}
+			}
 			return null;
 		});
 	}
@@ -116,6 +132,19 @@ public abstract class Convert {
 				Date date = Date.from(Instant.from((TemporalAccessor) x).atZone(ZoneId.systemDefault()).toInstant());
 				return new java.sql.Date(date.getTime());
 			}
+			if (x instanceof String) {
+				String value = (String) x;
+				String dateFormat = G.dateFormat(value);
+				if (dateFormat != null) {
+					SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+					try {
+						Date date = sdf.parse(value);
+						return new java.sql.Date(date.getTime());
+					} catch (Exception e) {
+						return null;
+					}
+				}
+			}
 			return null;
 		});
 	}
@@ -128,6 +157,18 @@ public abstract class Convert {
 			if (x instanceof TemporalAccessor) {
 				return LocalDate.from((TemporalAccessor) x);
 			}
+			if (x instanceof String) {
+				String value = (String) x;
+				String dateFormat = G.dateFormat(value);
+				if (dateFormat != null) {
+					DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateFormat);
+					try {
+						return LocalDate.parse(value, dtf);
+					} catch (Exception e) {
+						return null;
+					}
+				}
+			}
 			return null;
 		});
 	}
@@ -139,6 +180,18 @@ public abstract class Convert {
 			}
 			if (x instanceof TemporalAccessor) {
 				return LocalDateTime.from((TemporalAccessor) x);
+			}
+			if (x instanceof String) {
+				String value = (String) x;
+				String dateFormat = G.dateFormat(value);
+				if (dateFormat != null) {
+					DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateFormat);
+					try {
+						return LocalDateTime.parse(value, dtf);
+					} catch (Exception e) {
+						return null;
+					}
+				}
 			}
 			return null;
 		});

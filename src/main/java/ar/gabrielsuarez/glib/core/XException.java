@@ -24,7 +24,7 @@ public abstract class XException {
 		return t;
 	}
 	
-	public static StackTraceElement stackTraceElement(Throwable t, String packageName) {
+	public static StackTraceElement stackTraceFirstElement(Throwable t, String packageName) {
 		t = getCause(t);
 		StackTraceElement[] ste = t.getStackTrace();
 		StackTraceElement st = null;

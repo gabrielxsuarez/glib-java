@@ -87,4 +87,25 @@ public abstract class XCollection {
 		}
 		return lastNonEmpty;
 	}
+
+	@SafeVarargs
+	public static <T> T firstNonNull(T... values) {
+		for (T value : values) {
+			if (value != null) {
+				return value;
+			}
+		}
+		return null;
+	}
+
+	@SafeVarargs
+	public static <T> T lastNonNull(T... values) {
+		T lastNonNull = null;
+		for (T value : values) {
+			if (value != null) {
+				lastNonNull = value;
+			}
+		}
+		return lastNonNull;
+	}
 }

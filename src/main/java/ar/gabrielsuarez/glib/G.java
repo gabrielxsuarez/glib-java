@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.TemporalAccessor;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
@@ -153,6 +154,10 @@ public abstract class G {
 		return Enviroment.sourcePath(relativePath);
 	}
 
+	public static String resourcePath() {
+		return Enviroment.resourcePath();
+	}
+
 	/* ========== REFLECTION ========== */
 	public static <T> T instance(Class<T> type, Object... parameters) {
 		return Reflection.instance(type, parameters);
@@ -160,6 +165,10 @@ public abstract class G {
 
 	public static Class<?>[] types(Object... values) {
 		return Reflection.types(values);
+	}
+
+	public static String javaType(Object value) {
+		return Reflection.javaType(value);
 	}
 
 	public static Field[] fields(Object object) {
@@ -308,14 +317,40 @@ public abstract class G {
 	public static <T> T lastNonEmpty(T... values) {
 		return XCollection.lastNonEmpty(values);
 	}
+	
+	@SafeVarargs
+	public static <T> T firstNonNull(T... values) {
+		return XCollection.firstNonNull(values);
+	}
+
+	@SafeVarargs
+	public static <T> T lastNonNull(T... values) {
+		return XCollection.lastNonNull(values);
+	}
 
 	/* ========== XDATE ========== */
+	public static String toString(Date value) {
+		return XDate.toString(value);
+	}
+
+	public static String toString(TemporalAccessor value) {
+		return XDate.toString(value);
+	}
+	
+	public static Boolean isDate(String value) {
+		return XDate.isDate(value);
+	}
+	
 	public static String dateMask(String value) {
 		return XDate.dateMask(value);
 	}
 
 	public static String dateFormat(String value) {
 		return XDate.dateFormat(value);
+	}
+
+	public static Boolean dateFormatContainsTime(String dateFormat) {
+		return XDate.dateFormatContainsTime(dateFormat);
 	}
 
 	/* ========== XEXCEPTION ========== */
@@ -327,8 +362,8 @@ public abstract class G {
 		return XException.getCause(t);
 	}
 
-	public static StackTraceElement stackTraceElement(Throwable t, String packageName) {
-		return XException.stackTraceElement(t, packageName);
+	public static StackTraceElement stackTraceFirstElement(Throwable t, String packageName) {
+		return XException.stackTraceFirstElement(t, packageName);
 	}
 
 	public static String toString(Exception e) {

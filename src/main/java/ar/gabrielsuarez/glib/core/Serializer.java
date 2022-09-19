@@ -2,14 +2,24 @@ package ar.gabrielsuarez.glib.core;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JacksonException;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -41,6 +51,10 @@ public abstract class Serializer {
 
 	protected static SimpleModule module() {
 		SimpleModule simpleModule = new SimpleModule();
+		simpleModule.addSerializer(Date.class, new DateSerializer());
+		simpleModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer());
+		simpleModule.addDeserializer(Date.class, new DateDeserializer());
+		simpleModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer());
 //		simpleModule.addSerializer(Data.class, new DataSerializer());
 		return simpleModule;
 	}
@@ -165,6 +179,32 @@ public abstract class Serializer {
 	}
 
 	/* ========== CUSTOM SERIALIZER ========== */
+	public static class DateSerializer extends JsonSerializer<Date> {
+		public void serialize(Date value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+			gen.writeString(G.toString(value));
+		}
+	}
+
+	public static class DateDeserializer extends JsonDeserializer<Date> {
+		public Date deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+			String value = p.getText().trim();
+			return G.toDate(value);
+		}
+	}
+
+	public static class LocalDateTimeSerializer extends JsonSerializer<LocalDateTime> {
+		public void serialize(LocalDateTime value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+			gen.writeString(G.toString(value));
+		}
+	}
+
+	public static class LocalDateTimeDeserializer extends JsonDeserializer<LocalDateTime> {
+		public LocalDateTime deserialize(JsonParser p, DeserializationContext ctxt) throws IOException, JacksonException {
+			String value = p.getText().trim();
+			return G.toLocalDateTime(value);
+		}
+	}
+
 //	private static class DataSerializer extends JsonSerializer<Data> {
 //		public void serialize(Data value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
 //			Object object = value.object();

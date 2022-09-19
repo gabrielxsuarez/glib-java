@@ -48,11 +48,18 @@ public abstract class Enviroment {
 		File currentPath = new File(compiledPath());
 		while (currentPath.getParentFile() != null) {
 			currentPath = currentPath.getParentFile();
-			Set<String> names = new HashSet<>(Arrays.asList(currentPath.list()));
-			if (names.contains("pom.xml") || names.contains("build.gradle")) {
-				return new File(currentPath.getAbsoluteFile(), relativePath).getAbsolutePath();
+			String[] currentPathList = currentPath.list();
+			if (currentPathList != null) {
+				Set<String> names = new HashSet<>(Arrays.asList(currentPathList));
+				if (names.contains("pom.xml") || names.contains("build.gradle")) {
+					return new File(currentPath.getAbsoluteFile(), relativePath).getAbsolutePath();
+				}
 			}
 		}
 		return null;
+	}
+
+	public static String resourcePath() {
+		return sourcePath("src/main/resources");
 	}
 }
