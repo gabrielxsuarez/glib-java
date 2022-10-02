@@ -23,6 +23,7 @@ public abstract class Convert {
 
 	/* ========== INIT ========== */
 	static {
+		castMap.put(String.class, values -> toString(values));
 		castMap.put(Boolean.class, values -> toBoolean(values));
 		castMap.put(Short.class, values -> toShort(values));
 		castMap.put(Integer.class, values -> toInteger(values));
@@ -45,6 +46,11 @@ public abstract class Convert {
 			return (T) function.apply(values);
 		}
 		return null;
+	}
+
+	/* ========== STRING ========== */
+	public static String toString(Object... values) {
+		return convert(values, String.class, x -> x.toString());
 	}
 
 	/* ========== BOOLEAN ========== */

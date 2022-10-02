@@ -36,6 +36,10 @@ public abstract class G {
 		return Convert.cast(type, values);
 	}
 	
+	public static String toString(Object... values) {
+		return Convert.toString(values);
+	}
+	
 	public static Boolean toBoolean(Object... values) {
 		return Convert.toBoolean(values);
 	}
@@ -159,6 +163,10 @@ public abstract class G {
 	}
 
 	/* ========== REFLECTION ========== */
+	public static <T> T instance(Class<T> type) {
+		return Reflection.instance(type);
+	}
+	
 	public static <T> T instance(Class<T> type, Object... parameters) {
 		return Reflection.instance(type, parameters);
 	}
