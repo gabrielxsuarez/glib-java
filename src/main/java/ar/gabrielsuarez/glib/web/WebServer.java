@@ -25,7 +25,7 @@ public class WebServer {
 
 	public <A extends WebApplication<C>, C extends WebContext> void register(Class<A> applicationType, Class<C> contextType) {
 		A application = G.instance(applicationType);
-		application.setWebServer(this);
+		application.setServer(this);
 		application.setContextType(contextType);
 		applications.add(application);
 	}
