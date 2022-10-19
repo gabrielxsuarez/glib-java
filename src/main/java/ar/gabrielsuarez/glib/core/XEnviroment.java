@@ -8,7 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public abstract class Enviroment {
+public abstract class XEnviroment {
 
 	/* ========== CHECK ========== */
 	public static Boolean isWindows() {

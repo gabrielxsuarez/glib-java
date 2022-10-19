@@ -120,7 +120,7 @@ public class Data {
 
 	/* ========== GET ========== */
 	public Object get(String key) {
-		Object current = raw();
+		Object current = this;
 		String[] subkeys = key.split("\\.");
 		for (String subkey : subkeys) {
 			current = getSubKey(current, subkey);
@@ -137,7 +137,7 @@ public class Data {
 		} else if (context instanceof List) {
 			List<Object> current = (List<Object>) context;
 			Integer index = G.toInteger(subkey);
-			if (index != null && current.size() > index) {
+			if (index != null && current.size() > index && index >= 0) {
 				return current.get(index);
 			}
 		}
@@ -179,11 +179,13 @@ public class Data {
 			} else if (context instanceof List) {
 				List<Object> current = (List<Object>) context;
 				Integer index = G.toInteger(subkey);
-				Integer size = current.size();
-				for (int i = size; i <= index; ++i) {
-					current.add(null);
+				if (index != null) {
+					Integer size = current.size();
+					for (int i = size; i <= index; ++i) {
+						current.add(null);
+					}
+					current.set(index, next);
 				}
-				current.set(index, next);
 			}
 		}
 		return next;
@@ -204,7 +206,9 @@ public class Data {
 			for (int i = size; i <= index; ++i) {
 				current.add(null);
 			}
-			current.set(index, value);
+			if (index >= 0) {
+				current.set(index, value);
+			}
 		}
 		return null;
 	}
@@ -224,6 +228,57 @@ public class Data {
 	public Object object(String key, Object defaultValue) {
 		Object object = get(key);
 		return object != null ? object : defaultValue;
+	}
+
+	public Data data(String key) {
+		return data(key, null);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Data data(String key, Data defaultValue) {
+		Object object = object(key);
+		if (object instanceof Data) {
+			return (Data) object;
+		}
+		if (object instanceof Map) {
+			return fromMap((Map<String, Object>) object);
+		}
+		if (object instanceof Data) {
+			return fromList((List<Object>) object);
+		}
+		return defaultValue;
+	}
+
+	public Map<String, Object> map(String key) {
+		return map(key, null);
+	}
+
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> map(String key, Map<String, Object> defaultValue) {
+		Object object = object(key);
+		if (object instanceof Data) {
+			return ((Data) object).map;
+		}
+		if (object instanceof Map) {
+			return (Map<String, Object>) object;
+		}
+		return defaultValue;
+	}
+
+	public List<Object> list(String key) {
+		return list(key, null);
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Object> list(String key, List<Object> defaultValue) {
+		Object object = object(key);
+		if (object instanceof Data) {
+			return ((Data) object).list;
+		}
+		if (object instanceof List) {
+			return (List<Object>) object;
+		}
+		return defaultValue;
 	}
 
 	public String string(String key) {
@@ -301,6 +356,6 @@ public class Data {
 
 	/* ========== TOSTRING ========== */
 	public String toString() {
-		return G.toJson(raw());
+		return toJson();
 	}
 }

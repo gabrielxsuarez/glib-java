@@ -7,7 +7,7 @@ import java.util.Properties;
 
 import ar.gabrielsuarez.glib.G;
 
-public abstract class Resource {
+public abstract class XResource {
 
 	/* ========== RESOURCE ========== */
 	public static InputStream resourceInputStream(String path) {

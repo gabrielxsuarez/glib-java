@@ -10,7 +10,7 @@ import java.util.Set;
 
 import ar.gabrielsuarez.glib.G;
 
-public abstract class Crypto {
+public abstract class XCrypto {
 
 	/* ========== HASH ========== */
 	public static String md2(String value) {

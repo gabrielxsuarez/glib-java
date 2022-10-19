@@ -1,4 +1,4 @@
-package ar.gabrielsuarez.glib.core;
+package ar.gabrielsuarez.glib.serialization;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

@@ -12,7 +12,7 @@ import java.util.Map;
 
 import ar.gabrielsuarez.glib.G;
 
-public abstract class Reflection {
+public abstract class XReflection {
 
 	/* ========== INSTANCE ========== */
 	public static <T> T instance(Class<T> type, Object... parameters) {
