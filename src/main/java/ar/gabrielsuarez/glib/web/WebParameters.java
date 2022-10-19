@@ -17,7 +17,7 @@ public class WebParameters {
 
     /* ========== LOAD ========== */
     WebParameters load(Request request) {
-        for (String parameter : request.queryParams()) {
+        for (String parameter : request.params().keySet()) {
             String value = request.queryParams(parameter);
             map.put(parameter, value);
         }

@@ -1,12 +1,12 @@
 package ar.gabrielsuarez.glib.web;
 
-import ar.gabrielsuarez.glib.web.Main.Contexto;
+import ar.gabrielsuarez.glib.web.TestWeb.Contexto;
 
-public class Main extends WebApplication<Contexto> {
-
+public class TestWeb extends WebApplication<Contexto> {
+	
 	public static void main(String[] args) {
 		WebServer server = new WebServer();
-		server.register(Main.class, Contexto.class);
+		server.register(TestWeb.class, Contexto.class);
 		server.run(8080);
 	}
 
@@ -16,9 +16,9 @@ public class Main extends WebApplication<Contexto> {
 	protected void endpoints() {
 		get("/", contexto -> saludar(contexto));
 	}
-	
+
 	public Object saludar(Contexto contexto) {
-		return "hola mundo";
+		return "hola mundo " + contexto.ip();
 	}
 
 	protected void before(Contexto contexto) {

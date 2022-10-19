@@ -27,6 +27,7 @@ import com.fasterxml.jackson.dataformat.yaml.YAMLMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import ar.gabrielsuarez.glib.G;
+import ar.gabrielsuarez.glib.data.Data;
 
 public abstract class Serializer {
 
@@ -45,6 +46,7 @@ public abstract class Serializer {
 	protected static void configure(ObjectMapper mapper) {
 		mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+		mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
 		mapper.registerModule(new JavaTimeModule());
 		mapper.registerModule(module());
 	}
@@ -55,7 +57,7 @@ public abstract class Serializer {
 		simpleModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer());
 		simpleModule.addDeserializer(Date.class, new DateDeserializer());
 		simpleModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer());
-//		simpleModule.addSerializer(Data.class, new DataSerializer());
+		simpleModule.addSerializer(Data.class, new DataSerializer());
 		return simpleModule;
 	}
 
@@ -205,12 +207,13 @@ public abstract class Serializer {
 		}
 	}
 
-//	private static class DataSerializer extends JsonSerializer<Data> {
-//		public void serialize(Data value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
-//			Object object = value.object();
-//			serializers.findValueSerializer(object.getClass()).serialize(object, gen, serializers);
-//		}
-//	}
+	public static class DataSerializer extends JsonSerializer<Data> {
+		public void serialize(Data value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+			Object object = value.raw();
+			JsonSerializer<Object> serializer = serializers.findTypedValueSerializer(object.getClass(), true, null);
+			serializer.serialize(object, gen, serializers);
+		}
+	}
 
 	/* ========== EXCEPTIONS ========== */
 	public static class SerializerException extends RuntimeException {

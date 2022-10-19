@@ -206,14 +206,19 @@ public abstract class Convert {
 	/* ========== PROTECTED ========== */
 	@SuppressWarnings("unchecked")
 	protected static <T> T convert(Object[] values, Class<T> type, Function<Object, T> function) {
-		for (Object value : values) {
-			if (value != null) {
-				if (value.getClass().equals(type)) {
-					return (T) value;
-				} else {
-					T data = function.apply(value);
-					if (data != null) {
-						return data;
+		if (values != null) {
+			for (Object value : values) {
+				if (value != null) {
+					if (value.getClass().equals(type)) {
+						return (T) value;
+					} else {
+						try {
+							T data = function.apply(value);
+							if (data != null) {
+								return data;
+							}
+						} catch (Exception e) {
+						}
 					}
 				}
 			}
