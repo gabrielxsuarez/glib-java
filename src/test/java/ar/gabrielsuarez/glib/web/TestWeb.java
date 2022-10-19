@@ -14,11 +14,11 @@ public class TestWeb extends WebApplication<Contexto> {
 	}
 
 	protected void endpoints() {
-		get("/", contexto -> saludar(contexto));
+		post("/:hola", contexto -> saludar(contexto));
 	}
 
 	public Object saludar(Contexto contexto) {
-		return "hola mundo " + contexto.ip();
+		return contexto.parameters;
 	}
 
 	protected void before(Contexto contexto) {

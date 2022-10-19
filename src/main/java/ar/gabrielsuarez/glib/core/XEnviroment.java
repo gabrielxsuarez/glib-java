@@ -62,4 +62,12 @@ public abstract class XEnviroment {
 	public static String resourcePath() {
 		return sourcePath("src/main/resources");
 	}
+
+	public static String tmpPath() {
+		String tmp = System.getProperty("java.io.tmpdir");
+		if (tmp == null || tmp.isEmpty()) {
+			tmp = "/tmp";
+		}
+		return tmp;
+	}
 }

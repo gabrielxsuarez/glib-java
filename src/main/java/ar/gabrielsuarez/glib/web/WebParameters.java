@@ -3,92 +3,102 @@ package ar.gabrielsuarez.glib.web;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import javax.servlet.MultipartConfigElement;
+import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.http.Part;
+
 import ar.gabrielsuarez.glib.G;
+import ar.gabrielsuarez.glib.data.Data;
+import ar.gabrielsuarez.glib.data.DataFile;
 import spark.Request;
 
-public class WebParameters {
+@MultipartConfig
+public class WebParameters extends Data {
 
-    /* ========== ATTRIBUTES ========== */
-    private Map<String, Object> map = new LinkedHashMap<>();
+	private Map<String, DataFile> files = new LinkedHashMap<>();
 
-    /* ========== INSTANCE ========== */
-    public WebParameters() {
-    }
+	/* ========== INSTANCE ========== */
+	public WebParameters() {
+	}
 
-    /* ========== LOAD ========== */
-    WebParameters load(Request request) {
-        for (String parameter : request.params().keySet()) {
-            String value = request.queryParams(parameter);
-            map.put(parameter, value);
-        }
-        try {
-            Map<String, Object> body = null;
-            body = G.toMap(request.body());
-            if (body != null) {
-                map.putAll(body);
-            }
-        } catch (Exception e) {
-        }
-        return this;
-    }
+	/* ========== LOAD ========== */
+	WebParameters load(Request request) {
+		loadPath(request);
+		loadQueryAndForm(request);
+		loadBody(request);
+		loadMultipart(request);
+		return this;
+	}
 
-    /* ========== METHODS ========== */
-    public Object get(String key) {
-        return map.get(key);
-    }
+	private void loadPath(Request request) {
+		for (String pathParam : request.params().keySet()) {
+			set(pathParam, request.params(pathParam));
+		}
+	}
 
-    public Object put(String ket, Object value) {
-        return map.put(ket, value);
-    }
+	private void loadQueryAndForm(Request request) {
+		for (String queryParam : request.queryParams()) {
+			set(queryParam, request.queryParams(queryParam));
+		}
+	}
 
-    public Object remove(String clave) {
-        return map.remove(clave);
-    }
+	private void loadBody(Request request) {
+		if (!isMultipart(request)) {
+			String body = request.body();
+			try {
+				if (G.posibleJson(body)) {
+					this.loadJson(body);
+				} else if (G.posibleXml(body)) {
+					this.loadXml(body);
+				}
+			} catch (Exception e) {
+			}
+		}
+	}
 
-    /* ========== STRING ========== */
-    public String string(String parametro) {
-        String valor = string(parametro, null);
-        if (valor == null) {
-            throw new RuntimeException("El parametro '" + parametro + "' es obligatorio");
-        }
-        return valor;
-    }
+	private void loadMultipart(Request request) {
+		try {
+			if (isMultipart(request)) {
+				request.attribute("org.eclipse.jetty.multipartConfig", new MultipartConfigElement(G.tmpPath()));
+				for (Part part : request.raw().getParts()) {
+					String key = part.getName();
+					String fileName = part.getSubmittedFileName();
+					if (fileName == null) {
+						String value = G.toString(part.getInputStream());
+						this.set(key, value);
+					} else {
+						byte[] bytes = G.toBytes(part.getInputStream());
+						DataFile file = new DataFile(fileName, bytes);
+						files.put(key, file);
+					}
+				}
+			}
+		} catch (Exception e) {
+			throw G.runtimeException(e);
+		}
+	}
 
-    public String string(String parametro, String valorPorDefecto) {
-        return G.toString(map.get(parametro), valorPorDefecto);
-    }
+	/* ========== GETTER ========== */
+	public Map<String, DataFile> files() {
+		return files;
+	}
 
-    /* ========== INTEGER ========== */
-    public Integer integer(String parametro) {
-        Integer valor = integer(parametro, null);
-        if (valor == null) {
-            if (parametro == null || parametro.isEmpty()) {
-                throw new RuntimeException("El parametro '" + parametro + "' es obligatorio");
-            }
-            throw new RuntimeException("El parametro '" + parametro + "' debe ser un número entero");
-        }
-        return valor;
-    }
+	public DataFile file(String fileName) {
+		return files.get(fileName);
+	}
 
-    public Integer integer(String parametro, Integer valorPorDefecto) {
-        return G.toInteger(map.get(parametro), valorPorDefecto);
-    }
+	/* ========== PRIVATE ========== */
+	private Boolean isMultipart(Request request) {
+		return request.headers("Content-Type").contains("multipart/form-data");
+	}
 
-    /* ========== BOOLEAN ========== */
-    public Boolean bool(String parametro) {
-        Boolean valor = bool(parametro, null);
-        if (valor == null) {
-            throw new RuntimeException("El parametro '" + parametro + "' es obligatorio");
-        }
-        return valor;
-    }
-
-    public Boolean bool(String parametro, Boolean valorPorDefecto) {
-        return G.toBoolean(map.get(parametro), valorPorDefecto);
-    }
-
-    /* ========== STRING ========== */
-    public String toString() {
-        return G.toJson(map);
-    }
+	/* ========== TOSTRING ========== */
+	public String toString() {
+		Data data = Data.fromData(this);
+		for (String key : files.keySet()) {
+			String value = "[binary:" + files.get(key).bytes.length + "]";
+			data.set(key, value);
+		}
+		return data.toString();
+	}
 }

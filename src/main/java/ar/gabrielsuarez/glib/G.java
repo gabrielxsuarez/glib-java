@@ -12,19 +12,22 @@ import java.time.LocalDateTime;
 import java.time.temporal.TemporalAccessor;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import ar.gabrielsuarez.glib.core.Convert;
-import ar.gabrielsuarez.glib.core.XCrypto;
-import ar.gabrielsuarez.glib.core.XEnviroment;
-import ar.gabrielsuarez.glib.core.XReflection;
-import ar.gabrielsuarez.glib.core.XResource;
 import ar.gabrielsuarez.glib.core.XCollection;
+import ar.gabrielsuarez.glib.core.XCrypto;
 import ar.gabrielsuarez.glib.core.XDate;
+import ar.gabrielsuarez.glib.core.XEnviroment;
 import ar.gabrielsuarez.glib.core.XException;
 import ar.gabrielsuarez.glib.core.XFile;
 import ar.gabrielsuarez.glib.core.XRandom;
+import ar.gabrielsuarez.glib.core.XReflection;
+import ar.gabrielsuarez.glib.core.XResource;
+import ar.gabrielsuarez.glib.core.XSerializer;
 import ar.gabrielsuarez.glib.core.XStream;
 import ar.gabrielsuarez.glib.core.XString;
 import ar.gabrielsuarez.glib.serialization.Serializer;
@@ -35,11 +38,11 @@ public abstract class G {
 	public static <T> T cast(Class<T> type, Object... values) {
 		return Convert.cast(type, values);
 	}
-	
+
 	public static String toString(Object... values) {
 		return Convert.toString(values);
 	}
-	
+
 	public static Boolean toBoolean(Object... values) {
 		return Convert.toBoolean(values);
 	}
@@ -71,7 +74,7 @@ public abstract class G {
 	public static BigDecimal toBigDecimal(Object... values) {
 		return Convert.toBigDecimal(values);
 	}
-	
+
 	public static Date toDate(Object... values) {
 		return Convert.toDate(values);
 	}
@@ -89,6 +92,16 @@ public abstract class G {
 	}
 
 	/* ========== XCOLLECTION ========== */
+	@SafeVarargs
+	public static <T extends Object> List<T> listOf(T... values) {
+		return XCollection.listOf(values);
+	}
+
+	@SafeVarargs
+	public static <T> Set<T> setOf(T... values) {
+		return XCollection.setOf(values);
+	}
+
 	public static <T> T add(Collection<T> collection, T value) {
 		return XCollection.add(collection, value);
 	}
@@ -128,7 +141,7 @@ public abstract class G {
 	public static <T> T lastNonEmpty(T... values) {
 		return XCollection.lastNonEmpty(values);
 	}
-	
+
 	@SafeVarargs
 	public static <T> T firstNonNull(T... values) {
 		return XCollection.firstNonNull(values);
@@ -184,11 +197,11 @@ public abstract class G {
 	public static String toString(TemporalAccessor value) {
 		return XDate.toString(value);
 	}
-	
+
 	public static Boolean isDate(String value) {
 		return XDate.isDate(value);
 	}
-	
+
 	public static String dateMask(String value) {
 		return XDate.dateMask(value);
 	}
@@ -236,6 +249,10 @@ public abstract class G {
 
 	public static String resourcePath() {
 		return XEnviroment.resourcePath();
+	}
+
+	public static String tmpPath() {
+		return XEnviroment.tmpPath();
 	}
 
 	/* ========== XEXCEPTION ========== */
@@ -294,7 +311,7 @@ public abstract class G {
 	public static <T> T instance(Class<T> type) {
 		return XReflection.instance(type);
 	}
-	
+
 	public static <T> T instance(Class<T> type, Object... parameters) {
 		return XReflection.instance(type, parameters);
 	}
@@ -347,6 +364,15 @@ public abstract class G {
 	public static Map<String, String> propertiesToMap(String path) {
 		return XResource.propertiesToMap(path);
 	}
+	
+	/* ========== XSERIALIZER ========== */
+	public static Boolean posibleJson(String value) {
+		return XSerializer.posibleJson(value);
+	}
+
+	public static Boolean posibleXml(String value) {
+		return XSerializer.posibleXml(value);
+	}
 
 	/* ========== XSTREAM ========== */
 	public static byte[] toBytes(InputStream inputStream) {
@@ -362,6 +388,10 @@ public abstract class G {
 	}
 
 	/* ========== XSTRING ========== */
+	public static Boolean isBlank(Character character) {
+		return XString.isBlank(character);
+	}
+	
 	public static String toHex(byte[] bytes) {
 		return XString.toHex(bytes);
 	}

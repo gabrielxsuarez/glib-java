@@ -33,6 +33,10 @@ public class Data {
 		convertToMap();
 	}
 
+	public static Data fromData(Data data) {
+		return new Data().load(data.raw());
+	}
+
 	public static Data fromMap(Map<String, Object> map) {
 		return new Data().loadMap(map);
 	}
@@ -63,6 +67,10 @@ public class Data {
 			convertToList().list.addAll((List<Object>) object);
 		}
 		return this;
+	}
+
+	public Data loadData(Data data) {
+		return load(data.raw());
 	}
 
 	public Data loadMap(Map<String, Object> map) {
