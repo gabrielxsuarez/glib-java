@@ -4,7 +4,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.servlet.MultipartConfigElement;
-import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.http.Part;
 
 import ar.gabrielsuarez.glib.G;
@@ -12,9 +11,9 @@ import ar.gabrielsuarez.glib.data.Data;
 import ar.gabrielsuarez.glib.data.DataFile;
 import spark.Request;
 
-@MultipartConfig
 public class WebParameters extends Data {
 
+	/* ========== ATTRIBUTES ========== */
 	private Map<String, DataFile> files = new LinkedHashMap<>();
 
 	/* ========== INSTANCE ========== */
