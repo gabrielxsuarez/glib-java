@@ -76,34 +76,39 @@ public abstract class WebApplication<T extends WebContext> {
 				context.setRequest(request);
 				context.setResponse(response);
 				context.parameters.load(request);
-				for (String key : request.headers()) {
-					String value = request.headers(key);
-					context.headers.set(key, value);
-				}
+				context.init();
 				try {
-					before(context);
-					Object body = function.apply(context);
-					webResponse = after(context, body);
+					webResponse = before(context);
+					if (webResponse == null) {
+						Object body = function.apply(context);
+						webResponse = after(context, body);
+					}
 				} catch (Exception e) {
+					context.httpCode(500);
 					webResponse = exception(context, e);
 				}
-				response.status(webResponse.httpCode);
-				for (String header : webResponse.headers.keySet()) {
-					response.header(header, webResponse.headers.get(header));
+				if (webResponse != null) {
+					response.status(webResponse.httpCode);
+					for (String header : webResponse.headers.keySet()) {
+						response.header(header, webResponse.headers.get(header));
+					}
+					if (context.isGzipEnabled()) {
+						response.header("Content-Encoding", "gzip");
+					}
+					return webResponse.body;
 				}
-				if (context.isGzipEnabled()) {
-					response.header("Content-Encoding", "gzip");
-				}
-				return webResponse.body;
+				return null;
 			}
 		};
 		return route;
 	}
 
 	/* ========== ABSTRACT ========== */
+	protected abstract void init();
+
 	protected abstract void endpoints();
 
-	protected abstract void before(T context);
+	protected abstract WebResponse before(T context);
 
 	protected abstract WebResponse after(T context, Object body);
 

@@ -17,11 +17,15 @@ public class TestWeb extends WebApplication<Contexto> {
 		post("/:hola", contexto -> saludar(contexto));
 	}
 
+	protected void init() {
+	}
+
 	public Object saludar(Contexto contexto) {
 		return contexto.parameters;
 	}
 
-	protected void before(Contexto contexto) {
+	protected WebResponse before(Contexto contexto) {
+		return null;
 	}
 
 	protected WebResponse after(Contexto contexto, Object body) {

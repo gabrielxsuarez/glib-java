@@ -88,7 +88,8 @@ public class WebParameters extends Data {
 
 	/* ========== PRIVATE ========== */
 	private Boolean isMultipart(Request request) {
-		return request.headers("Content-Type").contains("multipart/form-data");
+		String contentType = request.headers("Content-Type");
+		return contentType != null && contentType.contains("multipart/form-data");
 	}
 
 	/* ========== TOSTRING ========== */
