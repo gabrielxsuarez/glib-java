@@ -70,34 +70,33 @@ public abstract class WebApplication<T extends WebContext> {
 	/* ========== PRIVATE ========== */
 	private Route process(Function<T, Object> function) {
 		Route route = new Route() {
-			public Object handle(Request request, Response response) {
-				WebResponse webResponse = null;
+			public Object handle(Request sparkRequest, Response sparkResponse) {
 				T context = G.instance(contextType);
-				context.setRequest(request);
-				context.setResponse(response);
-				context.parameters.load(request);
+				context.setRequest(sparkRequest);
+				context.setResponse(sparkResponse);
+				context.parameters.load(sparkRequest);
 				context.init();
 				try {
-					webResponse = before(context);
-					if (webResponse == null) {
+					before(context);
+					if (!context.response.isReady()) {
 						Object body = function.apply(context);
-						webResponse = after(context, body);
+						context.response.setBody(body);
+					}
+					if (!context.response.isReady()) {
+						after(context);
 					}
 				} catch (Exception e) {
-					context.httpCode(500);
-					webResponse = exception(context, e);
+					context.response.setHttpCode(500);
+					exception(context, e);
 				}
-				if (webResponse != null) {
-					response.status(webResponse.httpCode);
-					for (String header : webResponse.headers.keySet()) {
-						response.header(header, webResponse.headers.get(header));
-					}
-					if (context.isGzipEnabled()) {
-						response.header("Content-Encoding", "gzip");
-					}
-					return webResponse.body;
+				sparkResponse.status(context.response.httpCode());
+				for (String header : context.response.headers()) {
+					sparkResponse.header(header, context.response.header(header));
 				}
-				return null;
+				if (context.isGzipEnabled()) {
+					sparkResponse.header("Content-Encoding", "gzip");
+				}
+				return context.response.body();
 			}
 		};
 		return route;
@@ -108,9 +107,9 @@ public abstract class WebApplication<T extends WebContext> {
 
 	protected abstract void endpoints();
 
-	protected abstract WebResponse before(T context);
+	protected abstract void before(T context);
 
-	protected abstract WebResponse after(T context, Object body);
+	protected abstract void after(T context);
 
-	protected abstract WebResponse exception(T context, Exception e);
+	protected abstract void exception(T context, Exception e);
 }

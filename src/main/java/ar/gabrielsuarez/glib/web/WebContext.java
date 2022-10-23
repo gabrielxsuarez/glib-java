@@ -10,11 +10,13 @@ import javax.servlet.http.HttpServletResponse;
 import spark.Request;
 import spark.Response;
 
-public class WebContext {
+public abstract class WebContext {
 
-	/* ========== ATTRIBUTES ========== */
+	/* ========== PRIVATE ========== */
 	private Request sparkRequest;
 	private Response sparkResponse;
+
+	/* ========== ATTRIBUTES ========== */
 	public WebParameters parameters = new WebParameters();
 	public WebResponse response = new WebResponse();
 
@@ -23,8 +25,7 @@ public class WebContext {
 	}
 
 	/* ========== INIT ========== */
-	public void init() {
-	}
+	public abstract void init();
 
 	void setRequest(Request request) {
 		this.sparkRequest = request;
@@ -54,19 +55,6 @@ public class WebContext {
 	public String requestHeader(String header, String defaultValue) {
 		String value = sparkRequest != null ? sparkRequest.headers(header) : null;
 		return value != null ? value : defaultValue;
-	}
-
-	/* ========== SETTER ========== */
-	public void httpCode(Integer httpCode) {
-		response.httpCode = httpCode;
-	}
-
-	public void contentType(String value) {
-		responseHeader("Content-Type", value);
-	}
-
-	public void responseHeader(String header, String value) {
-		this.response.headers.put(header, value);
 	}
 
 	/* ========== METHODS ========== */
