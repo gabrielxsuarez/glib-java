@@ -17,6 +17,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.json.JsonMapper;
+
 import ar.gabrielsuarez.glib.core.Convert;
 import ar.gabrielsuarez.glib.core.XCollection;
 import ar.gabrielsuarez.glib.core.XCrypto;
@@ -344,6 +346,14 @@ public abstract class G {
 		return XReflection.trimAllFields(objects);
 	}
 
+	public static <T> Boolean equals(T object1, T object2) {
+		return XReflection.equals(object1, object2);
+	}
+
+	public static Integer hashCode(Object object) {
+		return XReflection.hashCode(object);
+	}
+
 	/* ========== XRESOURCE ========== */
 	public static InputStream resourceInputStream(String path) {
 		return XResource.resourceInputStream(path);
@@ -364,7 +374,7 @@ public abstract class G {
 	public static Map<String, String> propertiesToMap(String path) {
 		return XResource.propertiesToMap(path);
 	}
-	
+
 	/* ========== XSERIALIZER ========== */
 	public static Boolean posibleJson(String value) {
 		return XSerializer.posibleJson(value);
@@ -391,7 +401,7 @@ public abstract class G {
 	public static Boolean isBlank(Character character) {
 		return XString.isBlank(character);
 	}
-	
+
 	public static String toHex(byte[] bytes) {
 		return XString.toHex(bytes);
 	}
@@ -435,6 +445,10 @@ public abstract class G {
 
 	public static String toJson(Object object) {
 		return Serializer.toJson(object);
+	}
+
+	public static String toJson(Object object, JsonMapper mapper) {
+		return Serializer.toJson(object, mapper);
 	}
 
 	public static String toJsonSingleLine(Object object) {

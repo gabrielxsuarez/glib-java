@@ -61,6 +61,13 @@ public abstract class Serializer {
 		return simpleModule;
 	}
 
+	/* ========== MAPPER ========== */
+	public static JsonMapper jsonMapper() {
+		JsonMapper jsonMapper = new JsonMapper();
+		configure(jsonMapper);
+		return jsonMapper;
+	}
+
 	/* ========== MAP ========== */
 	public static <T> T fromMap(Map<String, Object> map, Class<T> type) {
 		return fromJson(toJson(map), type);
@@ -85,8 +92,12 @@ public abstract class Serializer {
 	}
 
 	public static String toJson(Object object) {
+		return toJson(object, jsonMapper);
+	}
+
+	public static String toJson(Object object, JsonMapper mapper) {
 		try {
-			return jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
 		} catch (Exception e) {
 			throw new SerializerException(e);
 		}

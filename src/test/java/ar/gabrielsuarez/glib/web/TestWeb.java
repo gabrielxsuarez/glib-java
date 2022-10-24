@@ -13,6 +13,9 @@ public class TestWeb extends WebApplication<Contexto> {
 	public static class Contexto extends WebContext {
 		public void init() {
 		}
+
+		public void ultimately() {
+		}
 	}
 
 	protected void endpoints() {
@@ -33,5 +36,8 @@ public class TestWeb extends WebApplication<Contexto> {
 	}
 
 	protected void exception(Contexto contexto, Exception e) {
+	}
+
+	protected void ultimately(Contexto context) {
 	}
 }
