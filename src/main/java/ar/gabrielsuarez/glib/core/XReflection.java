@@ -106,6 +106,17 @@ public abstract class XReflection {
 		return objects;
 	}
 
+	/* ========== CLONE ========== */
+	@SuppressWarnings("unchecked")
+	public static <T> T clone(T object) {
+		if (object != null) {
+			String json = G.toJson(object);
+			T value = (T) G.fromJson(json, object.getClass());
+			return value;
+		}
+		return null;
+	}
+
 	/* ========== EQUALS & HASHCODE ========== */
 	public static <T> Boolean equals(T object1, T object2) {
 		try {

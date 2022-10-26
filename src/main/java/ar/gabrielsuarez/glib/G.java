@@ -309,6 +309,10 @@ public abstract class G {
 		return XRandom.randomFrom(values);
 	}
 
+	public static String uuid() {
+		return XRandom.uuid();
+	}
+
 	/* ========== XREFLECTION ========== */
 	public static <T> T instance(Class<T> type) {
 		return XReflection.instance(type);
@@ -344,6 +348,10 @@ public abstract class G {
 
 	public static <T extends Iterable<?>> T trimAllFields(T objects) {
 		return XReflection.trimAllFields(objects);
+	}
+
+	public static <T> T clone(T object) {
+		return XReflection.clone(object);
 	}
 
 	public static <T> Boolean equals(T object1, T object2) {
