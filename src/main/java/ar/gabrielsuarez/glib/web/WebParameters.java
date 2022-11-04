@@ -46,9 +46,9 @@ public class WebParameters extends Data {
 		if (!isMultipart(request)) {
 			String body = request.body();
 			try {
-				if (G.posibleJson(body)) {
+				if (G.likeJson(body)) {
 					this.loadJson(body);
-				} else if (G.posibleXml(body)) {
+				} else if (G.likeXml(body)) {
 					this.loadXml(body);
 				}
 			} catch (Exception e) {

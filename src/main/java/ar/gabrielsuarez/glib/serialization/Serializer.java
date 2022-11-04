@@ -61,6 +61,23 @@ public abstract class Serializer {
 		return simpleModule;
 	}
 
+	/* ========== CUSTOM ========== */
+	public static <T> void addSerializer(Class<? extends T> type, JsonSerializer<T> serializer) {
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(type, serializer);
+		jsonMapper.registerModule(module);
+		xmlMapper.registerModule(module);
+		yamlMapper.registerModule(module);
+	}
+
+	public static <T> void addDeserializer(Class<T> type, JsonDeserializer<? extends T> deserializer) {
+		SimpleModule module = new SimpleModule();
+		module.addDeserializer(type, deserializer);
+		jsonMapper.registerModule(module);
+		xmlMapper.registerModule(module);
+		yamlMapper.registerModule(module);
+	}
+
 	/* ========== MAPPER ========== */
 	public static JsonMapper jsonMapper() {
 		JsonMapper jsonMapper = new JsonMapper();
@@ -92,12 +109,8 @@ public abstract class Serializer {
 	}
 
 	public static String toJson(Object object) {
-		return toJson(object, jsonMapper);
-	}
-
-	public static String toJson(Object object, JsonMapper mapper) {
 		try {
-			return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+			return jsonMapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
 		} catch (Exception e) {
 			throw new SerializerException(e);
 		}
