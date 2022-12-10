@@ -6,6 +6,7 @@ public class TestWeb extends WebApplication<Contexto> {
 
 	public static void main(String[] args) {
 		WebServer server = new WebServer();
+		server.staticFiles("web");
 		server.register(TestWeb.class, Contexto.class);
 		server.run(8080);
 	}

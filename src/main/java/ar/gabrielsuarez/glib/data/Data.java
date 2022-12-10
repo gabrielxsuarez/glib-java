@@ -127,29 +127,28 @@ public class Data {
 	}
 
 	/* ========== GET ========== */
+	@SuppressWarnings("unchecked")
 	public Object get(String key) {
 		Object current = this;
 		String[] subkeys = key.split("\\.");
-		for (String subkey : subkeys) {
-			current = getSubKey(current, subkey);
+		for (int i = 0; i < subkeys.length; ++i) {
+			current = current instanceof Data ? ((Data) current).raw() : current;
+			if (current instanceof Map) {
+				Map<String, Object> map = (Map<String, Object>) current;
+				current = map.get(subkeys[i]);
+				continue;
+			}
+			if (current instanceof List) {
+				List<Object> list = (List<Object>) current;
+				Integer index = G.toInteger(subkeys[i]);
+				if (index != null && list.size() > index && index >= 0) {
+					current = list.get(index);
+					continue;
+				}
+			}
+			current = null;
 		}
 		return current;
-	}
-
-	@SuppressWarnings("unchecked")
-	private Object getSubKey(Object context, String subkey) {
-		context = context instanceof Data ? ((Data) context).raw() : context;
-		if (context instanceof Map) {
-			Map<String, Object> current = (Map<String, Object>) context;
-			return current.get(subkey);
-		} else if (context instanceof List) {
-			List<Object> current = (List<Object>) context;
-			Integer index = G.toInteger(subkey);
-			if (index != null && current.size() > index && index >= 0) {
-				return current.get(index);
-			}
-		}
-		return null;
 	}
 
 	/* ========== SET ========== */
@@ -159,11 +158,55 @@ public class Data {
 		return data;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Data set(String key, Object value) {
 		Object current = this;
 		String[] subkeys = key.split("\\.");
 		for (int i = 0; i < subkeys.length; ++i) {
-			current = (i + 1 == subkeys.length) ? setSubKey(current, subkeys[i], value) : setSubKey(current, subkeys[i]);
+			Integer index = G.toInteger(subkeys[i]);
+			current = current instanceof Data ? ((Data) current).raw() : current;
+			if (index != null && index > 0 && current instanceof List) {
+				List<Object> list = (List<Object>) current;
+				while (list.size() <= index) {
+					list.add(null);
+				}
+			}
+			Boolean last = (i + 1 >= subkeys.length);
+			if (!last) {
+				if (current instanceof Map) {
+					Map<String, Object> map = (Map<String, Object>) current;
+					current = map.get(subkeys[i]);
+					if (current == null) {
+						current = new Data();
+						map.put(subkeys[i], current);
+					}
+					continue;
+				}
+				if (current instanceof List) {
+					List<Object> list = (List<Object>) current;
+					if (index != null) {
+						current = list.get(index);
+						if (current == null) {
+							current = new Data();
+							list.set(index, current);
+						}
+						continue;
+					}
+				}
+				throw new RuntimeException();
+			} else {
+				if (current instanceof Map) {
+					Map<String, Object> map = (Map<String, Object>) current;
+					map.put(subkeys[i], value);
+					continue;
+				}
+				if (current instanceof List) {
+					List<Object> list = (List<Object>) current;
+					list.set(index, value);
+					continue;
+				}
+				throw new RuntimeException();
+			}
 		}
 		return this;
 	}
@@ -173,52 +216,6 @@ public class Data {
 			return set(key, value);
 		}
 		return this;
-	}
-
-	@SuppressWarnings("unchecked")
-	private Object setSubKey(Object context, String subkey) {
-		Object next = getSubKey(context, subkey);
-		if (next == null) {
-			next = new Data();
-			context = context instanceof Data ? ((Data) context).raw() : context;
-			if (context instanceof Map) {
-				Map<String, Object> current = (Map<String, Object>) context;
-				current.put(subkey, next);
-			} else if (context instanceof List) {
-				List<Object> current = (List<Object>) context;
-				Integer index = G.toInteger(subkey);
-				if (index != null) {
-					Integer size = current.size();
-					for (int i = size; i <= index; ++i) {
-						current.add(null);
-					}
-					current.set(index, next);
-				}
-			}
-		}
-		return next;
-	}
-
-	@SuppressWarnings("unchecked")
-	private Object setSubKey(Object context, String subkey, Object value) {
-		Integer index = G.toInteger(subkey);
-		if (context instanceof Data) {
-			context = index == null ? ((Data) context).raw() : ((Data) context).convertToList().raw();
-		}
-		if (context instanceof Map) {
-			Map<String, Object> current = (Map<String, Object>) context;
-			current.put(subkey, value);
-		} else if (context instanceof List) {
-			List<Object> current = (List<Object>) context;
-			Integer size = current.size();
-			for (int i = size; i <= index; ++i) {
-				current.add(null);
-			}
-			if (index >= 0) {
-				current.set(index, value);
-			}
-		}
-		return null;
 	}
 
 	/* ========== DATA ========== */

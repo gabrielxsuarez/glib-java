@@ -33,7 +33,6 @@ import ar.gabrielsuarez.glib.core.XResource;
 import ar.gabrielsuarez.glib.core.XSerializer;
 import ar.gabrielsuarez.glib.core.XStream;
 import ar.gabrielsuarez.glib.core.XString;
-import ar.gabrielsuarez.glib.data.External;
 import ar.gabrielsuarez.glib.serialization.Serializer;
 
 public abstract class G {
@@ -437,12 +436,10 @@ public abstract class G {
 	}
 
 	/* ========== SERIALIZER ========== */
-	@External
 	public static <T> void addSerializer(Class<? extends T> type, JsonSerializer<T> serializer) {
 		Serializer.addSerializer(type, serializer);
 	}
 
-	@External
 	public static <T> void addDeserializer(Class<T> type, JsonDeserializer<? extends T> deserializer) {
 		Serializer.addDeserializer(type, deserializer);
 	}
