@@ -16,16 +16,16 @@ public class Data {
 	private List<Object> list;
 
 	/* ========== CONVERT ========== */
-	public Data convertToMap() {
+	public Map<String, Object> convertToMap() {
 		this.map = (map == null) ? new LinkedHashMap<>() : map;
 		this.list = null;
-		return this;
+		return this.map;
 	}
 
-	public Data convertToList() {
+	public List<Object> convertToList() {
 		this.map = null;
 		this.list = (list == null) ? new ArrayList<>() : list;
-		return this;
+		return this.list;
 	}
 
 	/* ========== INSTANCE ========== */
@@ -61,10 +61,10 @@ public class Data {
 	@SuppressWarnings("unchecked")
 	private Data load(Object object) {
 		if (object instanceof Map) {
-			convertToMap().map.putAll((Map<String, Object>) object);
+			convertToMap().putAll((Map<String, Object>) object);
 		}
 		if (object instanceof List) {
-			convertToList().list.addAll((List<Object>) object);
+			convertToList().addAll((List<Object>) object);
 		}
 		return this;
 	}
@@ -214,6 +214,78 @@ public class Data {
 	public Data set(String key, Object value, Boolean condition) {
 		if (condition) {
 			return set(key, value);
+		}
+		return this;
+	}
+
+	/* ========== ADD ========== */
+	public Data add() {
+		Data data = new Data();
+		convertToList().add(data);
+		return data;
+	}
+
+	public Data add(String key) {
+		Data data = new Data();
+		add(key, data);
+		return data;
+	}
+
+	// TODO
+	public Data add(String key, Object value) {
+		return null;
+	}
+
+	public Data add(String key, Object value, Boolean condition) {
+		if (condition) {
+			return add(key, value);
+		}
+		return this;
+	}
+
+	/* ========== DELETE ========== */
+	@SuppressWarnings("unchecked")
+	public Data del(String key) {
+		Object current = this;
+		String[] subkeys = key.split("\\.");
+		for (int i = 0; i < subkeys.length; ++i) {
+			Integer index = G.toInteger(subkeys[i]);
+			current = current instanceof Data ? ((Data) current).raw() : current;
+			Boolean last = (i + 1 >= subkeys.length);
+			if (!last) {
+				if (current instanceof Map) {
+					Map<String, Object> map = (Map<String, Object>) current;
+					current = map.get(subkeys[i]);
+					continue;
+				}
+				if (current instanceof List) {
+					List<Object> list = (List<Object>) current;
+					if (index != null) {
+						current = list.get(index);
+						continue;
+					}
+				}
+				throw new RuntimeException();
+			} else {
+				if (current instanceof Map) {
+					Map<String, Object> map = (Map<String, Object>) current;
+					map.remove(subkeys[i]);
+					continue;
+				}
+				if (current instanceof List) {
+					List<Object> list = (List<Object>) current;
+					list.remove(index);
+					continue;
+				}
+				throw new RuntimeException();
+			}
+		}
+		return this;
+	}
+
+	public Data del(String key, Boolean condition) {
+		if (condition) {
+			return del(key);
 		}
 		return this;
 	}
