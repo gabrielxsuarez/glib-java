@@ -15,19 +15,6 @@ public class Data {
 	private Map<String, Object> map;
 	private List<Object> list;
 
-	/* ========== CONVERT ========== */
-	public Map<String, Object> convertToMap() {
-		this.map = (map == null) ? new LinkedHashMap<>() : map;
-		this.list = null;
-		return this.map;
-	}
-
-	public List<Object> convertToList() {
-		this.map = null;
-		this.list = (list == null) ? new ArrayList<>() : list;
-		return this.list;
-	}
-
 	/* ========== INSTANCE ========== */
 	public Data() {
 		convertToMap();
@@ -55,6 +42,19 @@ public class Data {
 
 	public static Data fromYaml(String yaml) {
 		return new Data().loadYaml(yaml);
+	}
+
+	/* ========== CONVERT ========== */
+	public Map<String, Object> convertToMap() {
+		this.map = (map == null) ? new LinkedHashMap<>() : map;
+		this.list = null;
+		return this.map;
+	}
+
+	public List<Object> convertToList() {
+		this.map = null;
+		this.list = (list == null) ? new ArrayList<>() : list;
+		return this.list;
 	}
 
 	/* ========== LOAD ========== */
@@ -161,52 +161,41 @@ public class Data {
 	@SuppressWarnings("unchecked")
 	public Data set(String key, Object value) {
 		Object current = this;
+		Object next = this;
 		String[] subkeys = key.split("\\.");
 		for (int i = 0; i < subkeys.length; ++i) {
-			Integer index = G.toInteger(subkeys[i]);
 			current = current instanceof Data ? ((Data) current).raw() : current;
-			if (index != null && index > 0 && current instanceof List) {
-				List<Object> list = (List<Object>) current;
+			Map<String, Object> map = (current instanceof Map) ? (Map<String, Object>) current : null;
+			List<Object> list = (current instanceof List) ? (List<Object>) current : null;
+			Integer index = G.toInteger(subkeys[i]);
+			Boolean validIndex = (index != null && index > 0);
+			Boolean isLast = (i + 1 == subkeys.length);
+			Boolean nextLast = (i + 2 == subkeys.length);
+			if (map != null) {
+				if (!isLast) {
+					next = map.get(subkeys[i]);
+					if (next == null || (!nextLast && !(next instanceof Data) && !(next instanceof Map) && !(next instanceof List))) {
+						map.put(subkeys[i], new Data());
+					}
+				} else {
+					map.put(subkeys[i], value);
+				}
+			} else if (list != null && validIndex) {
 				while (list.size() <= index) {
 					list.add(null);
 				}
-			}
-			Boolean last = (i + 1 >= subkeys.length);
-			if (!last) {
-				if (current instanceof Map) {
-					Map<String, Object> map = (Map<String, Object>) current;
-					current = map.get(subkeys[i]);
-					if (current == null) {
-						current = new Data();
-						map.put(subkeys[i], current);
+				if (!isLast) {
+					next = list.get(index);
+					if (next == null || (!nextLast && !(next instanceof Data) && !(next instanceof Map) && !(next instanceof List))) {
+						list.set(index, new Data());
 					}
-					continue;
-				}
-				if (current instanceof List) {
-					List<Object> list = (List<Object>) current;
-					if (index != null) {
-						current = list.get(index);
-						if (current == null) {
-							current = new Data();
-							list.set(index, current);
-						}
-						continue;
-					}
-				}
-				throw new RuntimeException();
-			} else {
-				if (current instanceof Map) {
-					Map<String, Object> map = (Map<String, Object>) current;
-					map.put(subkeys[i], value);
-					continue;
-				}
-				if (current instanceof List) {
-					List<Object> list = (List<Object>) current;
+				} else {
 					list.set(index, value);
-					continue;
 				}
+			} else {
 				throw new RuntimeException();
 			}
+			current = next;
 		}
 		return this;
 	}
