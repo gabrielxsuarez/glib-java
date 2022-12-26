@@ -44,6 +44,19 @@ public class Data {
 		return new Data().loadYaml(yaml);
 	}
 
+	/* ========== INSTANCE RAW ========== */
+	public static Data fromRawMap(Map<String, Object> map) {
+		Data data = new Data();
+		data.map = map;
+		return data;
+	}
+
+	public static Data fromRawList(List<Object> list) {
+		Data data = new Data();
+		data.list = list;
+		return data;
+	}
+
 	/* ========== CONVERT ========== */
 	public Map<String, Object> convertToMap() {
 		this.map = (map == null) ? new LinkedHashMap<>() : map;
@@ -160,42 +173,40 @@ public class Data {
 
 	@SuppressWarnings("unchecked")
 	public Data set(String key, Object value) {
-		Object current = this;
-		Object next = this;
+		Data context = this;
+		Data next = null;
 		String[] subkeys = key.split("\\.");
 		for (int i = 0; i < subkeys.length; ++i) {
-			current = current instanceof Data ? ((Data) current).raw() : current;
-			Map<String, Object> map = (current instanceof Map) ? (Map<String, Object>) current : null;
-			List<Object> list = (current instanceof List) ? (List<Object>) current : null;
-			Integer index = G.toInteger(subkeys[i]);
-			Boolean validIndex = (index != null && index > 0);
+			Object object = null;
+			String subkey = subkeys[i];
+			Integer index = G.toInteger(subkey);
+			Boolean validIndex = (index != null && index >= 0);
 			Boolean isLast = (i + 1 == subkeys.length);
-			Boolean nextLast = (i + 2 == subkeys.length);
-			if (map != null) {
-				if (!isLast) {
-					next = map.get(subkeys[i]);
-					if (next == null || (!nextLast && !(next instanceof Data) && !(next instanceof Map) && !(next instanceof List))) {
-						map.put(subkeys[i], new Data());
-					}
+			if (!isLast) {
+				if (!validIndex) {
+					context.convertToMap();
+					object = context.map.get(subkey);
 				} else {
-					map.put(subkeys[i], value);
-				}
-			} else if (list != null && validIndex) {
-				while (list.size() <= index) {
-					list.add(null);
-				}
-				if (!isLast) {
-					next = list.get(index);
-					if (next == null || (!nextLast && !(next instanceof Data) && !(next instanceof Map) && !(next instanceof List))) {
-						list.set(index, new Data());
+					context.convertToList();
+					while (context.list.size() <= index) {
+						context.list.add(null);
 					}
+					object = context.list.get(index);
+				}
+				if (object instanceof Map) {
+					next = Data.fromRawMap((Map<String, Object>) object);
+				} else if (object instanceof List) {
+					next = Data.fromRawList((List<Object>) object);
+				} else if (object instanceof Data) {
+					next = (Data) object;
 				} else {
-					list.set(index, value);
+					next = new Data();
+					object = (!validIndex) ? context.convertToMap().put(subkey, next) : context.convertToList().set(index, next);
 				}
 			} else {
-				throw new RuntimeException();
+				object = (!validIndex) ? context.convertToMap().put(subkey, value) : context.convertToList().set(index, value);
 			}
-			current = next;
+			context = next;
 		}
 		return this;
 	}
