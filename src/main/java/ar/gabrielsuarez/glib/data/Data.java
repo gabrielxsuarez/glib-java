@@ -149,17 +149,13 @@ public class Data {
 			if (current instanceof Map) {
 				Map<String, Object> map = (Map<String, Object>) current;
 				current = map.get(subkeys[i]);
-				continue;
-			}
-			if (current instanceof List) {
+			} else if (current instanceof List) {
 				List<Object> list = (List<Object>) current;
 				Integer index = G.toInteger(subkeys[i]);
-				if (index != null && list.size() > index && index >= 0) {
-					current = list.get(index);
-					continue;
-				}
+				current = (index != null && list.size() > index && index >= 0) ? list.get(index) : null;
+			} else {
+				current = null;
 			}
-			current = null;
 		}
 		return current;
 	}
