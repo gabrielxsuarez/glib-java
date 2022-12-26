@@ -182,29 +182,29 @@ public class Data {
 			Integer index = G.toInteger(subkey);
 			Boolean validIndex = (index != null && index >= 0);
 			Boolean isLast = (i + 1 == subkeys.length);
-			if (!isLast) {
-				if (!validIndex) {
-					context.convertToMap();
-					object = context.map.get(subkey);
-				} else {
-					context.convertToList();
-					while (context.list.size() <= index) {
-						context.list.add(null);
-					}
-					object = context.list.get(index);
+			if (!validIndex) {
+				context.convertToMap();
+				object = context.map.get(subkey);
+			} else {
+				context.convertToList();
+				while (context.list.size() <= index) {
+					context.list.add(null);
 				}
-				if (object instanceof Map) {
+				object = context.list.get(index);
+			}
+			if (!isLast) {
+				if (object instanceof Data) {
+					next = (Data) object;
+				} else if (object instanceof Map) {
 					next = Data.fromRawMap((Map<String, Object>) object);
 				} else if (object instanceof List) {
 					next = Data.fromRawList((List<Object>) object);
-				} else if (object instanceof Data) {
-					next = (Data) object;
 				} else {
 					next = new Data();
-					object = (!validIndex) ? context.convertToMap().put(subkey, next) : context.convertToList().set(index, next);
+					object = (!validIndex) ? context.map.put(subkey, next) : context.list.set(index, next);
 				}
 			} else {
-				object = (!validIndex) ? context.convertToMap().put(subkey, value) : context.convertToList().set(index, value);
+				object = (!validIndex) ? context.map.put(subkey, value) : context.list.set(index, value);
 			}
 			context = next;
 		}
