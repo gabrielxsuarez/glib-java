@@ -199,10 +199,10 @@ public class Data {
 					next = new Data();
 					object = (!validIndex) ? context.map.put(subkey, next) : context.list.set(index, next);
 				}
+				context = next;
 			} else {
 				object = (!validIndex) ? context.map.put(subkey, value) : context.list.set(index, value);
 			}
-			context = next;
 		}
 		return this;
 	}
@@ -268,17 +268,6 @@ public class Data {
 		return this;
 	}
 
-	public static void main(String[] args) {
-		Data data = new Data();
-//		data.add().set("saludo", "hola");
-//		data.add("0.nombre", 13);
-//		data.add("0.nombre", 23);
-		data.set("persona.nombre", "gabriel");
-		data.set("persona.edad", 34);
-//		data.remove("persona.edad");
-		System.out.println(data);
-	}
-
 	public Data add(String key, Object value, Boolean condition) {
 		if (condition) {
 			return add(key, value);
@@ -288,15 +277,51 @@ public class Data {
 
 	/* ========== REMOVE ========== */
 	@SuppressWarnings("unchecked")
-	public Data remove(String key) {
-		return null;
+	public Boolean remove(String key) {
+		Data context = this;
+		Data next = null;
+		String[] subkeys = key.split("\\.");
+		for (int i = 0; i < subkeys.length; ++i) {
+			Object object = null;
+			String subkey = subkeys[i];
+			Integer index = G.toInteger(subkey);
+			Boolean validIndex = (index != null && index >= 0);
+			Boolean isLast = (i + 1 == subkeys.length);
+			if (context.map != null) {
+				object = context.map.get(subkey);
+			} else if (context.list != null && validIndex) {
+				object = context.list.get(index);
+			}
+			if (!isLast) {
+				if (object instanceof Data) {
+					next = (Data) object;
+				} else if (object instanceof Map) {
+					next = Data.fromRawMap((Map<String, Object>) object);
+				} else if (object instanceof List) {
+					next = Data.fromRawList((List<Object>) object);
+				} else {
+					return false;
+				}
+				context = next;
+			} else {
+				if (context.map != null) {
+					object = context.map.remove(subkey);
+					return object != null;
+				} else if (context.list != null && validIndex) {
+					return context.list.remove(index);
+				} else {
+					return false;
+				}
+			}
+		}
+		return false;
 	}
 
-	public Data remove(String key, Boolean condition) {
+	public Boolean remove(String key, Boolean condition) {
 		if (condition) {
 			return remove(key);
 		}
-		return this;
+		return false;
 	}
 
 	/* ========== DATA ========== */
