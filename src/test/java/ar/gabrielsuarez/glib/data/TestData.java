@@ -27,6 +27,6 @@ public class TestData  {
 		
 		data = new Data();
 		data.set("-1", "Gabriel");
-		assertEquals(null, data.get("-1"));
+		assertEquals("Gabriel", data.get("-1"));
 	}
 }
