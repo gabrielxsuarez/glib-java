@@ -227,9 +227,56 @@ public class Data {
 		return data;
 	}
 
-	// TODO
+	public Data addValue(Object value) {
+		convertToList().add(value);
+		return this;
+	}
+
+	@SuppressWarnings("unchecked")
 	public Data add(String key, Object value) {
-		return null;
+		Data context = this;
+		Data next = null;
+		String[] subkeys = key.split("\\.");
+		for (int i = 0; i < subkeys.length; ++i) {
+			Object object = null;
+			String subkey = subkeys[i];
+			Integer index = G.toInteger(subkey);
+			Boolean validIndex = (index != null && index >= 0);
+			if (!validIndex) {
+				context.convertToMap();
+				object = context.map.get(subkey);
+			} else {
+				context.convertToList();
+				while (context.list.size() <= index) {
+					context.list.add(null);
+				}
+				object = context.list.get(index);
+			}
+			if (object instanceof Data) {
+				next = (Data) object;
+			} else if (object instanceof Map) {
+				next = Data.fromRawMap((Map<String, Object>) object);
+			} else if (object instanceof List) {
+				next = Data.fromRawList((List<Object>) object);
+			} else {
+				next = new Data();
+				object = (!validIndex) ? context.map.put(subkey, next) : context.list.set(index, next);
+			}
+			context = next;
+		}
+		context.convertToList().add(value);
+		return this;
+	}
+
+	public static void main(String[] args) {
+		Data data = new Data();
+//		data.add().set("saludo", "hola");
+//		data.add("0.nombre", 13);
+//		data.add("0.nombre", 23);
+		data.set("persona.nombre", "gabriel");
+		data.set("persona.edad", 34);
+//		data.remove("persona.edad");
+		System.out.println(data);
 	}
 
 	public Data add(String key, Object value, Boolean condition) {
@@ -239,49 +286,15 @@ public class Data {
 		return this;
 	}
 
-	/* ========== DELETE ========== */
+	/* ========== REMOVE ========== */
 	@SuppressWarnings("unchecked")
-	public Data del(String key) {
-		Object current = this;
-		String[] subkeys = key.split("\\.");
-		for (int i = 0; i < subkeys.length; ++i) {
-			Integer index = G.toInteger(subkeys[i]);
-			current = current instanceof Data ? ((Data) current).raw() : current;
-			Boolean last = (i + 1 >= subkeys.length);
-			if (!last) {
-				if (current instanceof Map) {
-					Map<String, Object> map = (Map<String, Object>) current;
-					current = map.get(subkeys[i]);
-					continue;
-				}
-				if (current instanceof List) {
-					List<Object> list = (List<Object>) current;
-					if (index != null) {
-						current = list.get(index);
-						continue;
-					}
-				}
-				throw new RuntimeException();
-			} else {
-				if (current instanceof Map) {
-					Map<String, Object> map = (Map<String, Object>) current;
-					map.remove(subkeys[i]);
-					continue;
-				}
-				if (current instanceof List) {
-					List<Object> list = (List<Object>) current;
-					list.remove(index);
-					continue;
-				}
-				throw new RuntimeException();
-			}
-		}
-		return this;
+	public Data remove(String key) {
+		return null;
 	}
 
-	public Data del(String key, Boolean condition) {
+	public Data remove(String key, Boolean condition) {
 		if (condition) {
-			return del(key);
+			return remove(key);
 		}
 		return this;
 	}
