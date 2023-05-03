@@ -2,6 +2,7 @@ package ar.gabrielsuarez.glib.web;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
@@ -78,8 +79,8 @@ public class WebParameters extends Data {
 	}
 
 	/* ========== GETTER ========== */
-	public Map<String, DataFile> files() {
-		return files;
+	public Set<String> files() {
+		return files.keySet();
 	}
 
 	public DataFile file(String fileName) {
@@ -88,7 +89,8 @@ public class WebParameters extends Data {
 
 	/* ========== PRIVATE ========== */
 	private Boolean isMultipart(Request request) {
-		return request.headers("Content-Type").contains("multipart/form-data");
+		String contentType = request.headers("Content-Type");
+		return contentType != null && contentType.contains("multipart/form-data");
 	}
 
 	/* ========== TOSTRING ========== */

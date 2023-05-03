@@ -3,7 +3,7 @@ package ar.gabrielsuarez.glib.web;
 import ar.gabrielsuarez.glib.web.TestWeb.Contexto;
 
 public class TestWeb extends WebApplication<Contexto> {
-	
+
 	public static void main(String[] args) {
 		WebServer server = new WebServer();
 		server.register(TestWeb.class, Contexto.class);
@@ -11,10 +11,15 @@ public class TestWeb extends WebApplication<Contexto> {
 	}
 
 	public static class Contexto extends WebContext {
+		public void init() {
+		}
 	}
 
 	protected void endpoints() {
 		post("/:hola", contexto -> saludar(contexto));
+	}
+
+	protected void init() {
 	}
 
 	public Object saludar(Contexto contexto) {
@@ -24,14 +29,9 @@ public class TestWeb extends WebApplication<Contexto> {
 	protected void before(Contexto contexto) {
 	}
 
-	protected WebResponse after(Contexto contexto, Object body) {
-		WebResponse response = new WebResponse();
-		response.body = body;
-		return response;
+	protected void after(Contexto contexto) {
 	}
 
-	protected WebResponse exception(Contexto contexto, Exception e) {
-		e.printStackTrace();
-		return null;
+	protected void exception(Contexto contexto, Exception e) {
 	}
 }

@@ -21,6 +21,9 @@ public class WebServer {
 		}
 		http.init();
 		http.awaitInitialization();
+		for (WebApplication<?> aplicacion : applications) {
+			aplicacion.init();
+		}
 	}
 
 	public <A extends WebApplication<C>, C extends WebContext> void register(Class<A> applicationType, Class<C> contextType) {
@@ -28,6 +31,10 @@ public class WebServer {
 		application.setServer(this);
 		application.setContextType(contextType);
 		applications.add(application);
+	}
+
+	public void staticFiles(String path) {
+		http.staticFileLocation(path);
 	}
 
 	/* ========== HTTP ========== */
