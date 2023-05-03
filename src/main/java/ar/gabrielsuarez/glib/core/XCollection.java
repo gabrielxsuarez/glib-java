@@ -1,8 +1,31 @@
 package ar.gabrielsuarez.glib.core;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 public abstract class XCollection {
+
+	/* ========== COLLECTIONS ========== */
+	@SafeVarargs
+	public static <T extends Object> List<T> listOf(T... values) {
+		List<T> list = new ArrayList<>();
+		for (int i = 0; i < values.length; ++i) {
+			list.add(values[i]);
+		}
+		return list;
+	}
+
+	@SafeVarargs
+	public static <T> Set<T> setOf(T... values) {
+		Set<T> set = new LinkedHashSet<>();
+		for (int i = 0; i < values.length; ++i) {
+			set.add(values[i]);
+		}
+		return set;
+	}
 
 	/* ========== ADD ========== */
 	public static <T> T add(Collection<T> collection, T value) {
@@ -86,5 +109,26 @@ public abstract class XCollection {
 			}
 		}
 		return lastNonEmpty;
+	}
+
+	@SafeVarargs
+	public static <T> T firstNonNull(T... values) {
+		for (T value : values) {
+			if (value != null) {
+				return value;
+			}
+		}
+		return null;
+	}
+
+	@SafeVarargs
+	public static <T> T lastNonNull(T... values) {
+		T lastNonNull = null;
+		for (T value : values) {
+			if (value != null) {
+				lastNonNull = value;
+			}
+		}
+		return lastNonNull;
 	}
 }

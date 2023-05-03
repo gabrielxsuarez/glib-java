@@ -2,15 +2,19 @@ package ar.gabrielsuarez.glib.core;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+
+import ar.gabrielsuarez.glib.G;
 
 public abstract class Convert {
 
@@ -19,6 +23,7 @@ public abstract class Convert {
 
 	/* ========== INIT ========== */
 	static {
+		castMap.put(String.class, values -> toString(values));
 		castMap.put(Boolean.class, values -> toBoolean(values));
 		castMap.put(Short.class, values -> toShort(values));
 		castMap.put(Integer.class, values -> toInteger(values));
@@ -41,6 +46,11 @@ public abstract class Convert {
 			return (T) function.apply(values);
 		}
 		return null;
+	}
+
+	/* ========== STRING ========== */
+	public static String toString(Object... values) {
+		return convert(values, String.class, x -> x.toString());
 	}
 
 	/* ========== BOOLEAN ========== */
@@ -103,6 +113,18 @@ public abstract class Convert {
 			if (x instanceof TemporalAccessor) {
 				return Date.from(Instant.from((TemporalAccessor) x).atZone(ZoneId.systemDefault()).toInstant());
 			}
+			if (x instanceof String) {
+				String value = (String) x;
+				String dateFormat = G.dateFormat(value);
+				if (dateFormat != null) {
+					SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+					try {
+						return sdf.parse(value);
+					} catch (Exception e) {
+						return null;
+					}
+				}
+			}
 			return null;
 		});
 	}
@@ -116,6 +138,19 @@ public abstract class Convert {
 				Date date = Date.from(Instant.from((TemporalAccessor) x).atZone(ZoneId.systemDefault()).toInstant());
 				return new java.sql.Date(date.getTime());
 			}
+			if (x instanceof String) {
+				String value = (String) x;
+				String dateFormat = G.dateFormat(value);
+				if (dateFormat != null) {
+					SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+					try {
+						Date date = sdf.parse(value);
+						return new java.sql.Date(date.getTime());
+					} catch (Exception e) {
+						return null;
+					}
+				}
+			}
 			return null;
 		});
 	}
@@ -127,6 +162,18 @@ public abstract class Convert {
 			}
 			if (x instanceof TemporalAccessor) {
 				return LocalDate.from((TemporalAccessor) x);
+			}
+			if (x instanceof String) {
+				String value = (String) x;
+				String dateFormat = G.dateFormat(value);
+				if (dateFormat != null) {
+					DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateFormat);
+					try {
+						return LocalDate.parse(value, dtf);
+					} catch (Exception e) {
+						return null;
+					}
+				}
 			}
 			return null;
 		});
@@ -140,6 +187,18 @@ public abstract class Convert {
 			if (x instanceof TemporalAccessor) {
 				return LocalDateTime.from((TemporalAccessor) x);
 			}
+			if (x instanceof String) {
+				String value = (String) x;
+				String dateFormat = G.dateFormat(value);
+				if (dateFormat != null) {
+					DateTimeFormatter dtf = DateTimeFormatter.ofPattern(dateFormat);
+					try {
+						return LocalDateTime.parse(value, dtf);
+					} catch (Exception e) {
+						return null;
+					}
+				}
+			}
 			return null;
 		});
 	}
@@ -147,14 +206,19 @@ public abstract class Convert {
 	/* ========== PROTECTED ========== */
 	@SuppressWarnings("unchecked")
 	protected static <T> T convert(Object[] values, Class<T> type, Function<Object, T> function) {
-		for (Object value : values) {
-			if (value != null) {
-				if (value.getClass().equals(type)) {
-					return (T) value;
-				} else {
-					T data = function.apply(value);
-					if (data != null) {
-						return data;
+		if (values != null) {
+			for (Object value : values) {
+				if (value != null) {
+					if (value.getClass().equals(type)) {
+						return (T) value;
+					} else {
+						try {
+							T data = function.apply(value);
+							if (data != null) {
+								return data;
+							}
+						} catch (Exception e) {
+						}
 					}
 				}
 			}

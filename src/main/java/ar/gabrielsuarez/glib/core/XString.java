@@ -2,6 +2,7 @@ package ar.gabrielsuarez.glib.core;
 
 import java.net.URLEncoder;
 import java.util.Base64;
+import java.util.Set;
 
 import ar.gabrielsuarez.glib.G;
 
@@ -9,6 +10,12 @@ public abstract class XString {
 
 	/* ========== ATTRIBUTES ========== */
 	protected static final char[] HEX_ARRAY = "0123456789ABCDEF".toCharArray();
+	protected static final Set<Character> BLANKS = G.setOf(' ', '\t', '\r', '\n');
+
+	/* ========== UTIL ========== */
+	public static Boolean isBlank(Character character) {
+		return BLANKS.contains(character);
+	}
 
 	/* ========== HEX ========== */
 	public static String toHex(byte[] bytes) {

@@ -24,15 +24,21 @@ public class {{tableClassName}} {
     }
 
     /* ========== SELECT ========== */
-    public List<{{rowClassName}}> select() {
+    public List<{{rowClassName}}> select(String query, Object... parameters) {
         SqlRequest sql = new SqlRequest(dataSource);
         sql.append("SELECT * FROM {{tableName}}");
+        sql.append(query, parameters);
         SqlResponse response = sql.execute();
         return response.toList({{rowClassName}}.class);
     }
+
+    public {{rowClassName}} selectFirst(String query, Object... parameters) {
+        List<{{rowClassName}}> list = select(query, parameters);
+        return !list.isEmpty() ? list.get(0) : null;
+    }
     {{#if columnsKeys}}
 
-    public {{rowClassName}} select({{#columnsKeys}}{{javaClass}} {{javaName}}{{#unless @last}}, {{/unless}}{{/columnsKeys}}) {
+    public {{rowClassName}} selectById({{#columnsKeys}}{{javaClass}} {{javaName}}{{#unless @last}}, {{/unless}}{{/columnsKeys}}) {
         SqlRequest sql = new SqlRequest(dataSource);
         sql.append("SELECT * FROM {{tableName}}");
         {{#columnsKeys}}
