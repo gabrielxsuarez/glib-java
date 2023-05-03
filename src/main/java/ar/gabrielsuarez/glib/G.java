@@ -17,6 +17,9 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonSerializer;
+
 import ar.gabrielsuarez.glib.core.Convert;
 import ar.gabrielsuarez.glib.core.XCollection;
 import ar.gabrielsuarez.glib.core.XCrypto;
@@ -307,6 +310,10 @@ public abstract class G {
 		return XRandom.randomFrom(values);
 	}
 
+	public static String uuid() {
+		return XRandom.uuid();
+	}
+
 	/* ========== XREFLECTION ========== */
 	public static <T> T instance(Class<T> type) {
 		return XReflection.instance(type);
@@ -344,6 +351,18 @@ public abstract class G {
 		return XReflection.trimAllFields(objects);
 	}
 
+	public static <T> T clone(T object) {
+		return XReflection.clone(object);
+	}
+
+	public static <T> Boolean equals(T object1, T object2) {
+		return XReflection.equals(object1, object2);
+	}
+
+	public static Integer hashCode(Object object) {
+		return XReflection.hashCode(object);
+	}
+
 	/* ========== XRESOURCE ========== */
 	public static InputStream resourceInputStream(String path) {
 		return XResource.resourceInputStream(path);
@@ -364,14 +383,14 @@ public abstract class G {
 	public static Map<String, String> propertiesToMap(String path) {
 		return XResource.propertiesToMap(path);
 	}
-	
+
 	/* ========== XSERIALIZER ========== */
-	public static Boolean posibleJson(String value) {
-		return XSerializer.posibleJson(value);
+	public static Boolean likeJson(String value) {
+		return XSerializer.likeJson(value);
 	}
 
-	public static Boolean posibleXml(String value) {
-		return XSerializer.posibleXml(value);
+	public static Boolean likeXml(String value) {
+		return XSerializer.likeXml(value);
 	}
 
 	/* ========== XSTREAM ========== */
@@ -391,7 +410,7 @@ public abstract class G {
 	public static Boolean isBlank(Character character) {
 		return XString.isBlank(character);
 	}
-	
+
 	public static String toHex(byte[] bytes) {
 		return XString.toHex(bytes);
 	}
@@ -417,6 +436,14 @@ public abstract class G {
 	}
 
 	/* ========== SERIALIZER ========== */
+	public static <T> void addSerializer(Class<? extends T> type, JsonSerializer<T> serializer) {
+		Serializer.addSerializer(type, serializer);
+	}
+
+	public static <T> void addDeserializer(Class<T> type, JsonDeserializer<? extends T> deserializer) {
+		Serializer.addDeserializer(type, deserializer);
+	}
+
 	public static <T> T fromMap(Map<String, Object> map, Class<T> type) {
 		return Serializer.fromMap(map, type);
 	}

@@ -6,12 +6,16 @@ public class TestWeb extends WebApplication<Contexto> {
 
 	public static void main(String[] args) {
 		WebServer server = new WebServer();
+		server.staticFiles("web");
 		server.register(TestWeb.class, Contexto.class);
 		server.run(8080);
 	}
 
 	public static class Contexto extends WebContext {
 		public void init() {
+		}
+
+		public void ultimately() {
 		}
 	}
 
@@ -33,5 +37,8 @@ public class TestWeb extends WebApplication<Contexto> {
 	}
 
 	protected void exception(Contexto contexto, Exception e) {
+	}
+
+	protected void ultimately(Contexto context) {
 	}
 }

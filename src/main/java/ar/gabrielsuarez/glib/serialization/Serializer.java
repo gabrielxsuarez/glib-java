@@ -61,6 +61,30 @@ public abstract class Serializer {
 		return simpleModule;
 	}
 
+	/* ========== CUSTOM ========== */
+	public static <T> void addSerializer(Class<? extends T> type, JsonSerializer<T> serializer) {
+		SimpleModule module = new SimpleModule();
+		module.addSerializer(type, serializer);
+		jsonMapper.registerModule(module);
+		xmlMapper.registerModule(module);
+		yamlMapper.registerModule(module);
+	}
+
+	public static <T> void addDeserializer(Class<T> type, JsonDeserializer<? extends T> deserializer) {
+		SimpleModule module = new SimpleModule();
+		module.addDeserializer(type, deserializer);
+		jsonMapper.registerModule(module);
+		xmlMapper.registerModule(module);
+		yamlMapper.registerModule(module);
+	}
+
+	/* ========== MAPPER ========== */
+	public static JsonMapper jsonMapper() {
+		JsonMapper jsonMapper = new JsonMapper();
+		configure(jsonMapper);
+		return jsonMapper;
+	}
+
 	/* ========== MAP ========== */
 	public static <T> T fromMap(Map<String, Object> map, Class<T> type) {
 		return fromJson(toJson(map), type);

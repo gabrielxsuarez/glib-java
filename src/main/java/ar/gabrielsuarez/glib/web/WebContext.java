@@ -26,6 +26,8 @@ public abstract class WebContext {
 
 	/* ========== INIT ========== */
 	public abstract void init();
+	
+	public abstract void ultimately();
 
 	void setRequest(Request request) {
 		this.sparkRequest = request;
@@ -44,15 +46,15 @@ public abstract class WebContext {
 		return sparkResponse != null ? sparkResponse.raw() : null;
 	}
 
-	public Set<String> requestHeaders() {
+	public Set<String> headers() {
 		return sparkRequest != null ? sparkRequest.headers() : new HashSet<>();
 	}
 
-	public String requestHeader(String header) {
-		return requestHeader(header, "");
+	public String header(String header) {
+		return header(header, "");
 	}
 
-	public String requestHeader(String header, String defaultValue) {
+	public String header(String header, String defaultValue) {
 		String value = sparkRequest != null ? sparkRequest.headers(header) : null;
 		return value != null ? value : defaultValue;
 	}
@@ -65,7 +67,7 @@ public abstract class WebContext {
 	public String ip() {
 		String ip = null;
 		if (sparkRequest != null) {
-			String xForwardedFor = requestHeader("x-forwarded-for");
+			String xForwardedFor = header("x-forwarded-for");
 			if (!xForwardedFor.isEmpty()) {
 				ip = xForwardedFor.split(",")[0].trim();
 			} else {
@@ -76,11 +78,11 @@ public abstract class WebContext {
 	}
 
 	public String userAgent() {
-		return requestHeader("user-agent");
+		return header("user-agent");
 	}
 
 	public Boolean isGzipEnabled() {
-		String acceptEncoding = requestHeader("Accept-Encoding");
+		String acceptEncoding = header("Accept-Encoding");
 		if (!acceptEncoding.isEmpty()) {
 			String[] tokens = acceptEncoding.split(",");
 			if (Arrays.stream(tokens).map(String::trim).anyMatch(s -> s.equalsIgnoreCase("gzip"))) {

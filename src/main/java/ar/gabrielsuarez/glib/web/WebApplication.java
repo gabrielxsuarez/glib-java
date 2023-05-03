@@ -82,12 +82,13 @@ public abstract class WebApplication<T extends WebContext> {
 						Object body = function.apply(context);
 						context.response.setBody(body);
 					}
-					if (!context.response.isReady()) {
-						after(context);
-					}
+					after(context);
 				} catch (Exception e) {
 					context.response.setHttpCode(500);
 					exception(context, e);
+				} finally {
+					context.ultimately();
+					ultimately(context);
 				}
 				sparkResponse.status(context.response.httpCode());
 				for (String header : context.response.headers()) {
@@ -112,4 +113,6 @@ public abstract class WebApplication<T extends WebContext> {
 	protected abstract void after(T context);
 
 	protected abstract void exception(T context, Exception e);
+
+	protected abstract void ultimately(T context);
 }

@@ -4,7 +4,7 @@ import ar.gabrielsuarez.glib.G;
 
 public abstract class XSerializer {
 
-	public static Boolean posibleJson(String value) {
+	public static Boolean likeJson(String value) {
 		if (value != null) {
 			for (int i = 0; i < value.length(); i++) {
 				char character = value.charAt(i);
@@ -20,7 +20,7 @@ public abstract class XSerializer {
 		return false;
 	}
 
-	public static Boolean posibleXml(String value) {
+	public static Boolean likeXml(String value) {
 		if (value != null) {
 			for (int i = 0; i < value.length(); i++) {
 				char character = value.charAt(i);

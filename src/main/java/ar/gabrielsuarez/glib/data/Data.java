@@ -12,21 +12,8 @@ import ar.gabrielsuarez.glib.G;
 public class Data {
 
 	/* ========== ATTRIBUTES ========== */
-	private Map<String, Object> map;
-	private List<Object> list;
-
-	/* ========== CONVERT ========== */
-	public Data convertToMap() {
-		this.map = (map == null) ? new LinkedHashMap<>() : map;
-		this.list = null;
-		return this;
-	}
-
-	public Data convertToList() {
-		this.map = null;
-		this.list = (list == null) ? new ArrayList<>() : list;
-		return this;
-	}
+	public Map<String, Object> map;
+	public List<Object> list;
 
 	/* ========== INSTANCE ========== */
 	public Data() {
@@ -57,14 +44,40 @@ public class Data {
 		return new Data().loadYaml(yaml);
 	}
 
+	/* ========== INSTANCE RAW ========== */
+	public static Data fromRawMap(Map<String, Object> map) {
+		Data data = new Data();
+		data.map = map;
+		return data;
+	}
+
+	public static Data fromRawList(List<Object> list) {
+		Data data = new Data();
+		data.list = list;
+		return data;
+	}
+
+	/* ========== CONVERT ========== */
+	public Map<String, Object> convertToMap() {
+		this.map = (map == null) ? new LinkedHashMap<>() : map;
+		this.list = null;
+		return this.map;
+	}
+
+	public List<Object> convertToList() {
+		this.map = null;
+		this.list = (list == null) ? new ArrayList<>() : list;
+		return this.list;
+	}
+
 	/* ========== LOAD ========== */
 	@SuppressWarnings("unchecked")
-	private Data load(Object object) {
+	public Data load(Object object) {
 		if (object instanceof Map) {
-			convertToMap().map.putAll((Map<String, Object>) object);
+			convertToMap().putAll((Map<String, Object>) object);
 		}
 		if (object instanceof List) {
-			convertToList().list.addAll((List<Object>) object);
+			convertToList().addAll((List<Object>) object);
 		}
 		return this;
 	}
@@ -127,29 +140,24 @@ public class Data {
 	}
 
 	/* ========== GET ========== */
+	@SuppressWarnings("unchecked")
 	public Object get(String key) {
 		Object current = this;
 		String[] subkeys = key.split("\\.");
-		for (String subkey : subkeys) {
-			current = getSubKey(current, subkey);
-		}
-		return current;
-	}
-
-	@SuppressWarnings("unchecked")
-	private Object getSubKey(Object context, String subkey) {
-		context = context instanceof Data ? ((Data) context).raw() : context;
-		if (context instanceof Map) {
-			Map<String, Object> current = (Map<String, Object>) context;
-			return current.get(subkey);
-		} else if (context instanceof List) {
-			List<Object> current = (List<Object>) context;
-			Integer index = G.toInteger(subkey);
-			if (index != null && current.size() > index && index >= 0) {
-				return current.get(index);
+		for (int i = 0; i < subkeys.length; ++i) {
+			current = current instanceof Data ? ((Data) current).raw() : current;
+			if (current instanceof Map) {
+				Map<String, Object> map = (Map<String, Object>) current;
+				current = map.get(subkeys[i]);
+			} else if (current instanceof List) {
+				List<Object> list = (List<Object>) current;
+				Integer index = G.toInteger(subkeys[i]);
+				current = (index != null && list.size() > index && index >= 0) ? list.get(index) : null;
+			} else {
+				current = null;
 			}
 		}
-		return null;
+		return current;
 	}
 
 	/* ========== SET ========== */
@@ -159,11 +167,42 @@ public class Data {
 		return data;
 	}
 
+	@SuppressWarnings("unchecked")
 	public Data set(String key, Object value) {
-		Object current = this;
+		Data context = this;
+		Data next = null;
 		String[] subkeys = key.split("\\.");
 		for (int i = 0; i < subkeys.length; ++i) {
-			current = (i + 1 == subkeys.length) ? setSubKey(current, subkeys[i], value) : setSubKey(current, subkeys[i]);
+			Object object = null;
+			String subkey = subkeys[i];
+			Integer index = G.toInteger(subkey);
+			Boolean validIndex = (index != null && index >= 0);
+			Boolean isLast = (i + 1 == subkeys.length);
+			if (!validIndex) {
+				context.convertToMap();
+				object = context.map.get(subkey);
+			} else {
+				context.convertToList();
+				while (context.list.size() <= index) {
+					context.list.add(null);
+				}
+				object = context.list.get(index);
+			}
+			if (!isLast) {
+				if (object instanceof Data) {
+					next = (Data) object;
+				} else if (object instanceof Map) {
+					next = Data.fromRawMap((Map<String, Object>) object);
+				} else if (object instanceof List) {
+					next = Data.fromRawList((List<Object>) object);
+				} else {
+					next = new Data();
+					object = (!validIndex) ? context.map.put(subkey, next) : context.list.set(index, next);
+				}
+				context = next;
+			} else {
+				object = (!validIndex) ? context.map.put(subkey, value) : context.list.set(index, value);
+			}
 		}
 		return this;
 	}
@@ -175,50 +214,119 @@ public class Data {
 		return this;
 	}
 
-	@SuppressWarnings("unchecked")
-	private Object setSubKey(Object context, String subkey) {
-		Object next = getSubKey(context, subkey);
-		if (next == null) {
-			next = new Data();
-			context = context instanceof Data ? ((Data) context).raw() : context;
-			if (context instanceof Map) {
-				Map<String, Object> current = (Map<String, Object>) context;
-				current.put(subkey, next);
-			} else if (context instanceof List) {
-				List<Object> current = (List<Object>) context;
-				Integer index = G.toInteger(subkey);
-				if (index != null) {
-					Integer size = current.size();
-					for (int i = size; i <= index; ++i) {
-						current.add(null);
-					}
-					current.set(index, next);
-				}
-			}
-		}
-		return next;
+	/* ========== ADD ========== */
+	public Data add() {
+		Data data = new Data();
+		convertToList().add(data);
+		return data;
+	}
+
+	public Data add(String key) {
+		Data data = new Data();
+		add(key, data);
+		return data;
+	}
+
+	public Data add(Object value) {
+		convertToList().add(value);
+		return this;
 	}
 
 	@SuppressWarnings("unchecked")
-	private Object setSubKey(Object context, String subkey, Object value) {
-		Integer index = G.toInteger(subkey);
-		if (context instanceof Data) {
-			context = index == null ? ((Data) context).raw() : ((Data) context).convertToList().raw();
-		}
-		if (context instanceof Map) {
-			Map<String, Object> current = (Map<String, Object>) context;
-			current.put(subkey, value);
-		} else if (context instanceof List) {
-			List<Object> current = (List<Object>) context;
-			Integer size = current.size();
-			for (int i = size; i <= index; ++i) {
-				current.add(null);
+	public Data add(String key, Object value) {
+		Data context = this;
+		Data next = null;
+		String[] subkeys = key.split("\\.");
+		for (int i = 0; i < subkeys.length; ++i) {
+			Object object = null;
+			String subkey = subkeys[i];
+			Integer index = G.toInteger(subkey);
+			Boolean validIndex = (index != null && index >= 0);
+			if (!validIndex) {
+				context.convertToMap();
+				object = context.map.get(subkey);
+			} else {
+				context.convertToList();
+				while (context.list.size() <= index) {
+					context.list.add(null);
+				}
+				object = context.list.get(index);
 			}
-			if (index >= 0) {
-				current.set(index, value);
+			if (object instanceof Data) {
+				next = (Data) object;
+			} else if (object instanceof Map) {
+				next = Data.fromRawMap((Map<String, Object>) object);
+			} else if (object instanceof List) {
+				next = Data.fromRawList((List<Object>) object);
+			} else {
+				next = new Data();
+				object = (!validIndex) ? context.map.put(subkey, next) : context.list.set(index, next);
+			}
+			context = next;
+		}
+		context.convertToList().add(value);
+		return this;
+	}
+
+	public Data add(String key, Object value, Boolean condition) {
+		if (condition) {
+			return add(key, value);
+		}
+		return this;
+	}
+
+	public Data addValue(Object value) {
+		convertToList().add(value);
+		return this;
+	}
+
+	/* ========== REMOVE ========== */
+	@SuppressWarnings("unchecked")
+	public Boolean remove(String key) {
+		Data context = this;
+		Data next = null;
+		String[] subkeys = key.split("\\.");
+		for (int i = 0; i < subkeys.length; ++i) {
+			Object object = null;
+			String subkey = subkeys[i];
+			Integer index = G.toInteger(subkey);
+			Boolean validIndex = (index != null && index >= 0);
+			Boolean isLast = (i + 1 == subkeys.length);
+			if (context.map != null) {
+				object = context.map.get(subkey);
+			} else if (context.list != null && validIndex) {
+				object = context.list.get(index);
+			}
+			if (!isLast) {
+				if (object instanceof Data) {
+					next = (Data) object;
+				} else if (object instanceof Map) {
+					next = Data.fromRawMap((Map<String, Object>) object);
+				} else if (object instanceof List) {
+					next = Data.fromRawList((List<Object>) object);
+				} else {
+					return false;
+				}
+				context = next;
+			} else {
+				if (context.map != null) {
+					object = context.map.remove(subkey);
+					return object != null;
+				} else if (context.list != null && validIndex) {
+					return context.list.remove(index);
+				} else {
+					return false;
+				}
 			}
 		}
-		return null;
+		return false;
+	}
+
+	public Boolean remove(String key, Boolean condition) {
+		if (condition) {
+			return remove(key);
+		}
+		return false;
 	}
 
 	/* ========== DATA ========== */
@@ -255,6 +363,20 @@ public class Data {
 			return fromList((List<Object>) object);
 		}
 		return defaultValue;
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Data> dataList() {
+		Data data = this;
+		List<?> list = (data.list != null) ? data.list : new ArrayList<>();
+		return (List<Data>) list;
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Data> dataList(String key) {
+		Data data = data(key);
+		List<?> list = (data.list != null) ? data.list : new ArrayList<>();
+		return (List<Data>) list;
 	}
 
 	public Map<String, Object> map(String key) {
