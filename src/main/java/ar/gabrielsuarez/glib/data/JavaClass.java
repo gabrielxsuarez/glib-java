@@ -12,7 +12,7 @@ public class JavaClass {
 
 	/* ========== ATTRIBUTES ========== */
 	public String packageName;
-	public List<String> imports = new ArrayList<>(); 
+	public List<String> imports = new ArrayList<>();
 	public String name;
 	public Set<Attribute> attributes = new LinkedHashSet<>();
 	public List<JavaClass> subClasses = new ArrayList<>();

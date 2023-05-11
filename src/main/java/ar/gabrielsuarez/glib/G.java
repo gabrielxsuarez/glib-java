@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Predicate;
 
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.JsonSerializer;
@@ -27,6 +28,7 @@ import ar.gabrielsuarez.glib.core.XDate;
 import ar.gabrielsuarez.glib.core.XEnviroment;
 import ar.gabrielsuarez.glib.core.XException;
 import ar.gabrielsuarez.glib.core.XFile;
+import ar.gabrielsuarez.glib.core.XLambda;
 import ar.gabrielsuarez.glib.core.XRandom;
 import ar.gabrielsuarez.glib.core.XReflection;
 import ar.gabrielsuarez.glib.core.XResource;
@@ -37,7 +39,7 @@ import ar.gabrielsuarez.glib.serialization.Serializer;
 
 public abstract class G {
 
-	/* ========== CONVERT ========== */
+	/* ========== XCONVERT ========== */
 	public static <T> T cast(Class<T> type, Object... values) {
 		return Convert.cast(type, values);
 	}
@@ -273,6 +275,11 @@ public abstract class G {
 
 	public static String toString(Exception e) {
 		return XException.toString(e);
+	}
+
+	/* ========== XLAMBDA ========== */
+	public static <T> T findFirst(Collection<T> collection, Predicate<? super T> predicate) {
+		return XLambda.findFirst(collection, predicate);
 	}
 
 	/* ========== XFILE ========== */

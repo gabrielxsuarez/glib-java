@@ -3,6 +3,7 @@ package ar.gabrielsuarez.glib.data;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +15,9 @@ public class Data {
 	/* ========== ATTRIBUTES ========== */
 	public Map<String, Object> map;
 	public List<Object> list;
+
+	/* ========== OPTIONS ========== */
+	private Boolean caseSensitive;
 
 	/* ========== INSTANCE ========== */
 	public Data() {
@@ -28,7 +32,7 @@ public class Data {
 		return new Data().loadMap(map);
 	}
 
-	public static Data fromList(List<Object> list) {
+	public static Data fromList(Collection<? extends Object> list) {
 		return new Data().loadList(list);
 	}
 
@@ -70,14 +74,19 @@ public class Data {
 		return this.list;
 	}
 
+	public Data caseSensitive(Boolean caseSensitive) {
+		this.caseSensitive = caseSensitive;
+		return this;
+	}
+
 	/* ========== LOAD ========== */
 	@SuppressWarnings("unchecked")
 	public Data load(Object object) {
 		if (object instanceof Map) {
 			convertToMap().putAll((Map<String, Object>) object);
 		}
-		if (object instanceof List) {
-			convertToList().addAll((List<Object>) object);
+		if (object instanceof Collection) {
+			convertToList().addAll((Collection<Object>) object);
 		}
 		return this;
 	}
@@ -90,7 +99,7 @@ public class Data {
 		return load(map);
 	}
 
-	public Data loadList(List<Object> list) {
+	public Data loadList(Collection<? extends Object> list) {
 		return load(list);
 	}
 
@@ -148,7 +157,12 @@ public class Data {
 			current = current instanceof Data ? ((Data) current).raw() : current;
 			if (current instanceof Map) {
 				Map<String, Object> map = (Map<String, Object>) current;
-				current = map.get(subkeys[i]);
+				String subkey = subkeys[i];
+				if (caseSensitive == null || caseSensitive) {
+					current = map.get(subkey);
+				} else {
+					current = map.get(G.findFirst(map.keySet(), x -> x.equalsIgnoreCase(subkey)));
+				}
 			} else if (current instanceof List) {
 				List<Object> list = (List<Object>) current;
 				Integer index = G.toInteger(subkeys[i]);

@@ -4,8 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import org.junit.jupiter.api.Test;
 
-public class TestData  {
-	
+public class TestData {
+
 	@Test
 	protected void test() {
 		Data data = new Data();
@@ -20,11 +20,11 @@ public class TestData  {
 		assertEquals("Suarez", data.map("persona").get("apellido"));
 		assertEquals("Suarez", data.data("persona").get("apellido"));
 		assertEquals("Java", data.string("persona.lenguajes.0"));
-		
+
 		data = new Data();
 		data.set("1", "Gabriel");
 		assertEquals("Gabriel", data.toList().get(1));
-		
+
 		data = new Data();
 		data.set("-1", "Gabriel");
 		assertEquals("Gabriel", data.get("-1"));

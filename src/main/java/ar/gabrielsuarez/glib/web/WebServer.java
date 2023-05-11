@@ -21,9 +21,6 @@ public class WebServer {
 		}
 		http.init();
 		http.awaitInitialization();
-		for (WebApplication<?> aplicacion : applications) {
-			aplicacion.init();
-		}
 	}
 
 	public <A extends WebApplication<C>, C extends WebContext> void register(Class<A> applicationType, Class<C> contextType) {

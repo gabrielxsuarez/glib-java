@@ -1,6 +1,9 @@
 package ar.gabrielsuarez.glib.web;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -17,17 +20,22 @@ public class WebParameters extends Data {
 	/* ========== ATTRIBUTES ========== */
 	private Map<String, DataFile> files = new LinkedHashMap<>();
 
-	/* ========== INSTANCE ========== */
-	public WebParameters() {
-	}
+	/* ========== OPTIONS ========== */
+	public Boolean failOnNull = true;
 
-	/* ========== LOAD ========== */
-	WebParameters load(Request request) {
+	/* ========== INIT ========== */
+	WebParameters init(Request request) {
 		loadPath(request);
 		loadQueryAndForm(request);
 		loadBody(request);
 		loadMultipart(request);
 		return this;
+	}
+
+	/* ========== PRIVATE ========== */
+	private Boolean isMultipart(Request request) {
+		String contentType = request.headers("Content-Type");
+		return contentType != null && contentType.contains("multipart/form-data");
 	}
 
 	private void loadPath(Request request) {
@@ -78,7 +86,7 @@ public class WebParameters extends Data {
 		}
 	}
 
-	/* ========== GETTER ========== */
+	/* ========== FILES ========== */
 	public Set<String> files() {
 		return files.keySet();
 	}
@@ -87,10 +95,64 @@ public class WebParameters extends Data {
 		return files.get(fileName);
 	}
 
-	/* ========== PRIVATE ========== */
-	private Boolean isMultipart(Request request) {
-		String contentType = request.headers("Content-Type");
-		return contentType != null && contentType.contains("multipart/form-data");
+	public WebParameters setFile(DataFile file) {
+		if (file != null && file.name != null) {
+			files.put(file.name, file);
+		}
+		return this;
+	}
+
+	/* ========== DATA ========== */
+	public Object object(String key) {
+		return WebParamterException.check(failOnNull, key, super.object(key, null));
+	}
+
+	public Data data(String key) {
+		return WebParamterException.check(failOnNull, key, super.data(key, null));
+	}
+
+	public Map<String, Object> map(String key) {
+		return WebParamterException.check(failOnNull, key, super.map(key, null));
+	}
+
+	public List<Object> list(String key) {
+		return WebParamterException.check(failOnNull, key, super.list(key, null));
+	}
+
+	public String string(String key) {
+		return WebParamterException.check(failOnNull, key, super.string(key, null));
+	}
+
+	public Boolean bool(String key) {
+		return WebParamterException.check(failOnNull, key, super.bool(key, null));
+	}
+
+	public Short shortInt(String key) {
+		return WebParamterException.check(failOnNull, key, super.shortInt(key, null));
+	}
+
+	public Integer integer(String key) {
+		return WebParamterException.check(failOnNull, key, super.integer(key, null));
+	}
+
+	public Long longInt(String key) {
+		return WebParamterException.check(failOnNull, key, super.longInt(key, null));
+	}
+
+	public Float floatNumber(String key) {
+		return WebParamterException.check(failOnNull, key, super.floatNumber(key, null));
+	}
+
+	public Double doubleNumber(String key) {
+		return WebParamterException.check(failOnNull, key, super.doubleNumber(key, null));
+	}
+
+	public BigInteger bigInteger(String key) {
+		return WebParamterException.check(failOnNull, key, super.bigInteger(key, null));
+	}
+
+	public BigDecimal bigDecimal(String key) {
+		return WebParamterException.check(failOnNull, key, super.bigDecimal(key, null));
 	}
 
 	/* ========== TOSTRING ========== */
@@ -101,5 +163,25 @@ public class WebParameters extends Data {
 			data.set(key, value);
 		}
 		return data.toString();
+	}
+
+	/* ========== EXCEPTION ========== */
+	public static class WebParamterException extends RuntimeException {
+		private static final long serialVersionUID = 1L;
+
+		public String key;
+		public Object value;
+
+		public WebParamterException(String key, Object value) {
+			this.key = key;
+			this.value = value;
+		}
+
+		public static <T> T check(Boolean failOnNull, String key, T value) {
+			if (value == null && failOnNull) {
+				throw new WebParamterException(key, value);
+			}
+			return value;
+		}
 	}
 }
