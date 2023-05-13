@@ -32,9 +32,10 @@ public class WebResponse {
 		headers.put("Content-Type", value);
 	}
 
-	public void redirect(String url) {
+	public String redirect(String url) {
 		httpCode = 302;
 		headers.put("Location", url);
 		headers.remove("Content-Type");
+		return "";
 	}
 }

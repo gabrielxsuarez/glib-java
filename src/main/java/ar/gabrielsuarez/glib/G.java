@@ -16,10 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Predicate;
-
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.JsonSerializer;
 
 import ar.gabrielsuarez.glib.core.Convert;
 import ar.gabrielsuarez.glib.core.XCollection;
@@ -443,12 +441,8 @@ public abstract class G {
 	}
 
 	/* ========== SERIALIZER ========== */
-	public static <T> void addSerializer(Class<? extends T> type, JsonSerializer<T> serializer) {
-		Serializer.addSerializer(type, serializer);
-	}
-
-	public static <T> void addDeserializer(Class<T> type, JsonDeserializer<? extends T> deserializer) {
-		Serializer.addDeserializer(type, deserializer);
+	public static <T> void addSerializer(Class<? extends T> type, Function<T, Object> function) {
+		Serializer.addSerializer(type, function);
 	}
 
 	public static <T> T fromMap(Map<String, Object> map, Class<T> type) {

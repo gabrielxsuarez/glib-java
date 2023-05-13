@@ -9,6 +9,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.Map;
+import java.util.function.Function;
 
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -62,17 +63,15 @@ public abstract class Serializer {
 	}
 
 	/* ========== CUSTOM ========== */
-	public static <T> void addSerializer(Class<? extends T> type, JsonSerializer<T> serializer) {
+	public static <T> void addSerializer(Class<? extends T> type, Function<T, Object> function) {
 		SimpleModule module = new SimpleModule();
-		module.addSerializer(type, serializer);
-		jsonMapper.registerModule(module);
-		xmlMapper.registerModule(module);
-		yamlMapper.registerModule(module);
-	}
-
-	public static <T> void addDeserializer(Class<T> type, JsonDeserializer<? extends T> deserializer) {
-		SimpleModule module = new SimpleModule();
-		module.addDeserializer(type, deserializer);
+		module.addSerializer(type, new JsonSerializer<T>() {
+			public void serialize(T value, JsonGenerator gen, SerializerProvider serializers) throws IOException {
+				Object object = function.apply(value);
+				JsonSerializer<Object> serializer = serializers.findTypedValueSerializer(object.getClass(), true, null);
+				serializer.serialize(object, gen, serializers);
+			}
+		});
 		jsonMapper.registerModule(module);
 		xmlMapper.registerModule(module);
 		yamlMapper.registerModule(module);

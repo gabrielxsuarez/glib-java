@@ -24,6 +24,10 @@ public class WebRequest {
 		return sparkRequest != null ? sparkRequest.raw() : null;
 	}
 
+	public String method() {
+		return sparkRequest != null ? sparkRequest.requestMethod() : null;
+	}
+
 	public String uri() {
 		String uri = sparkRequest != null ? sparkRequest.uri() : "";
 		return uri;
@@ -35,6 +39,10 @@ public class WebRequest {
 			headers.caseSensitive(false);
 		}
 		return headers;
+	}
+
+	public String header(String key) {
+		return headers().string(key);
 	}
 
 	public WebParameters parameters() {
