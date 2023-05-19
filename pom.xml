@@ -3,7 +3,7 @@
 
 	<groupId>ar.gabrielsuarez</groupId>
 	<artifactId>glib</artifactId>
-	<version>0.4.1</version>
+	<version>0.4.2</version>
 
 	<name>glib</name>
 	<description>glib</description>

@@ -23,7 +23,7 @@ public class SqlRequest {
 	}
 
 	/* ========== BUILD ========== */
-	public void append(String sql, Object... parameters) {
+	public SqlRequest append(String sql, Object... parameters) {
 		Boolean generateSpace = this.sql.length() != 0;
 		generateSpace = generateSpace && this.sql.charAt(this.sql.length() - 1) != '(';
 		generateSpace = generateSpace && this.sql.charAt(this.sql.length() - 1) != ' ';
@@ -32,6 +32,7 @@ public class SqlRequest {
 		}
 		this.sql.append(sql);
 		this.parameters.addAll(Arrays.asList(parameters));
+		return this;
 	}
 
 	/* ========== EXECUTE ========== */

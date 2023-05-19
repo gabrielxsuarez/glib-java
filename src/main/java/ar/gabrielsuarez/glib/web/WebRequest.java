@@ -62,7 +62,7 @@ public class WebRequest {
 	public String ip() {
 		String ip = "";
 		if (sparkRequest != null) {
-			String xForwardedFor = sparkRequest.headers("x-forwarded-for");
+			String xForwardedFor = headers().string("x-forwarded-for", "");
 			if (!xForwardedFor.isEmpty()) {
 				ip = xForwardedFor.split(",")[0].trim();
 			} else {
@@ -73,14 +73,14 @@ public class WebRequest {
 	}
 
 	public String userAgent() {
-		String userAgent = sparkRequest != null ? sparkRequest.headers("user-agent") : "";
+		String userAgent = sparkRequest != null ? headers().string("user-agent", "") : "";
 		return userAgent;
 	}
 
 	public Boolean gzipEnabled() {
 		Boolean gzipEnabled = false;
 		if (sparkRequest != null) {
-			String acceptEncoding = sparkRequest.headers("Accept-Encoding");
+			String acceptEncoding = headers().string("Accept-Encoding", "");
 			if (!acceptEncoding.isEmpty()) {
 				String[] tokens = acceptEncoding.split(",");
 				if (Arrays.stream(tokens).map(String::trim).anyMatch(s -> s.equalsIgnoreCase("gzip"))) {
