@@ -35,8 +35,14 @@ public class WebRequest {
 
 	public Data headers() {
 		if (headers == null) {
-			headers = sparkRequest != null ? Data.fromList(sparkRequest.headers()) : new Data();
-			headers.caseSensitive(false);
+			Data data = new Data();
+			if (sparkRequest != null) {
+				for (String key : sparkRequest.headers()) {
+					data.set(key, sparkRequest.headers(key));
+				}
+			}
+			data.caseSensitive(false);
+			headers = data;
 		}
 		return headers;
 	}
